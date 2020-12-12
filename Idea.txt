@@ -1,0 +1,154 @@
+alohomora        | {                      | ah-LOH-ho-MOR-ah       | Unlocking Charm
+colloportus      | }                      | cul-loh-POR-tus        | Locking Spell 
+accio            | scanf                  | AK-ee-oh               | Summoning Charm 
+aparecium        |                        | AH-par-EE-see-um       | Revealing Charm. Reveals secret messages written in invisible ink, or any other hidden markings. Also works against Concealing charms
+avenseguim       | var x                  | ah-ven-SEH-gwim        | Turns an object into a tracking device.
+avada-kedavra    | exit(0)                | ah-VAH-dah keh-DAV-rah | Killing Curse
+carpe-retractum  | =                      | CAR-pay ruh-TRACK-tum  | Seize and Pull Charm (Produces a rope of light used to pull objects towards the caster)
+crucio           |                        | KROO-see-oh            | Inflicts intense pain on the recipient of the curse. This curse does not physically harm the victim, but may in extreme cases drive them insane
+depulso          | call function          | deh-PUL-soh            | Sends the target away from the caster. It is the counter-charm to the Summoning Charm.
+epoximise        | +                      | ee-POX-i-mise          | Adheres one object to another, as if they had been glued together.
+reverte          | return                 | ree-VUHR-tay           | Returns objects to their original positions or states.
+flipendo         | -                      | fli-PEN-doh            | Knocks objects and creatures backwards. 
+geminio          | *                      | jeh-MIH-nee-oh         | Doubling Charm (Duplicates the target)
+legilimens       | using vars             | Le-JIL-ih-mens         | Allows the caster to delve into the mind of the victim. 
+                 | (b in int 'a = b')     |                        |                    
+                 | avenseguim a           |                        |
+                 | carpe-retractum        |                        |
+                 | legilimens b           |                        |
+flagrate         | print                  | flah-GRAH-tay          | Writes in midair with firey marks.
+riddikulus       | random jump in program | rih-dih-KUL-lus        | A spell used when fighting a Boggart, "Riddikulus" forces the Boggart to take the appearance of an object the caster is focusing on.
+sectumsempra     | /                      | sec-tum-SEMP-rah       | Lacerates the target, as if they have been "slashed by a sword.
+serpensortia     | sin (s like snake)     | SER-pehn-SOR-tee-ah    | Snake Summons Spell
+imperio          | def func               | im-PEER-ee-oh          | Makes target obey every command.
+protego          | ( and )                | pro-TAY-goh            | Invisible shield that reflects spells and blocks physical entities.  
+revelio          | if                     | reh-VEL-ee-oh          | Reveals secrets about a person or object.
+otherwise        | else                   |                        | 
+colloshoo        | floor                  | CAWL-low-shoo          | Sticks the target's shoes to the ground.
+while            | 
+
+equal            | ==
+not-equal        | !=
+greater          | >
+less             | <
+greater-equal    | >=
+less-equal       | <=
+
+horcrux          | 0 or void
+duo              | 2
+tria             | 3
+maxima           | 6
+
+love             | main
+
+Grammar     ::= 'Godric's-Hollow' Var NewLines ProgramBody 'Privet-Drive'
+ProgramBody ::= {Declaration}+
+Declaration ::= 'imperio' Var horcrux Block | 'imperio' Var ArgList Block
+Block       ::= NewLines 'alohomora' NewLines Statement* NewLines 'colloportus' NewLines
+Statement   ::= CmdLine | Condition | Loop 
+CmdLine     ::= - [Expression, VDec, Assignment, Call, Jump, Print] NewLines
+Expression  ::= Comparand {[<, >, ==, !=, <=, >=] Comparand}*
+Comparand   ::= Term {[+, -] Term}*
+Term        ::= Factor {[*, /] Factor}*
+Factor      ::= 'protego' Expression 'protego' | Num | legilimens Var | Call | Floor | accio
+Condition   ::= 'revelio' 'protego' Expression 'protego' Block 'otherwise' Block | 'revelio' 'protego' Expression 'protego' Block
+Loop        ::= 'while' 'protego' Expression 'protego' Block
+VDec        ::= 'avenseguim' Assignment
+Assignment  ::= Var 'carpe-retractum' Expression
+Print       ::= flagrate Expression
+Floor       ::= colloshoo 'protego' Expression 'protego'
+Jump        ::= 'reverte' Expression
+Call        ::= depulso Var 'protego' 'protego' | depulso Var 'protego' ExprList 'protego'
+ExprList    ::= Expression {, Expression}*
+ArgList     ::= Var {, Var}*
+Var         ::= ['a'-'z']+
+Num         ::= horcrux | duo | tria | maxima 
+NewLines    ::= {'\n'}+
+
+======================================================================================================================
+SIMPLE
+======================================================================================================================
+ C
+---
+    int main()
+    {
+        int a = 0; 
+        int b = a + 17;
+
+        int c = 0;
+        scanf("%d", &c);
+
+        printf("%d", a + b + c);
+
+        return a;
+    }
+
+ PotterTongue
+--------------
+    Godric's-Hollow test
+
+    imperio love horcrux
+    alohomora 
+        - avenseguim a carpe-retractum horcrux
+        - avenseguim b carpe-retractum legilimens a epoximise duo geminio maxima epoximise duo epoximise tria
+
+        - avenseguim c carpe-retractum horcrux
+        - c carpe-retractum accio
+        - flagrate legilimens a epoximise legilimens b epoximise legilimens c
+    colloportus 
+
+    Privet-Drive
+
+======================================================================================================================
+Factorial
+======================================================================================================================
+ C
+---
+    int fact(int n)
+    {
+        if (n > 1)
+        {
+            return n * fact(n - 1);
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
+    int main()
+    {
+        double n = 0;
+        scanf("%lg", &n);
+
+        int result = fact(floor(n));
+        printf("%d", result);
+
+        return 0;
+    }
+
+ PotterTongue
+--------------
+    Godric's-Hollow factorial
+
+    imperio fact n
+    alohomora 
+        revelio legilimens n greater tria flipendo duo
+        alohomora
+            - reverte n geminio fact protego n flipendo tria epoximise duo protego
+        colloportus
+        otherwise
+        alohomora
+            - reverte tria epoximise duo
+        colloportus
+    colloportus 
+
+    imperio love horcrux
+    alohomora
+        - avenseguim n carpe-retractum horcrux
+        - n carpe-retractum accio
+        - avenseguim result carpe-retractum fact protego colloshoo protego n protego protego
+        - flagrate legilimens result
+    colloportus
+
+    Privet-Drive
