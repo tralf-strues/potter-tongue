@@ -28,6 +28,35 @@ Options = -std=c++2a
 
 # Privet-Drive
 
+# Godric's-Hollow factorial
+
+# imperio fact n
+# alohomora 
+#     revelio protego legilimens n greater tria flipendo duo protego
+#     alohomora
+#         - reverte legilimens n geminio depulso fact protego legilimens n flipendo tria epoximise duo protego
+#     colloportus
+#     otherwise
+#     alohomora
+#         - reverte tria epoximise duo
+#     colloportus
+
+#     while protego tria flipendo duo protego
+#     alohomora
+#         - flagrate maxima
+#     colloportus
+# colloportus 
+
+# imperio love horcrux
+# alohomora
+#     - avenseguim n carpe-retractum horcrux
+#     - n carpe-retractum accio
+#     - avenseguim result carpe-retractum depulso fact protego colloshoo protego legilimens n protego protego
+#     - flagrate legilimens result
+# colloportus
+
+# Privet-Drive
+
 SrcDir = src
 BinDir = bin
 IntDir = $(BinDir)/intermediates

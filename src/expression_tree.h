@@ -13,6 +13,7 @@ union NodeData
 enum NodeType
 {
     DECL_TYPE,
+    VDECL_TYPE,
     BLCK_TYPE,
     STAT_TYPE,
 

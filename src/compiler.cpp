@@ -191,7 +191,8 @@ void writeBlock(Compiler* compiler, Node* node)
 void writeStatement(Compiler* compiler, Node* node)
 {
     ASSERT_COMPILER(compiler);
-    assert(node != nullptr);
+    assert(node       != nullptr);
+    assert(node->left != nullptr);
 
     switch (node->left->type)
     {
@@ -264,7 +265,7 @@ void writeAssignment(Compiler* compiler, Node* node)
 
     writeExpression(compiler, node->right);
 
-    fprintf(OUTPUT, "pop [rax + %u]\n", 2 + getVarOffset(CUR_FUNC, node->data.id));
+    fprintf(OUTPUT, "pop [rax + %u]\n\n", 2 + getVarOffset(CUR_FUNC, node->left->data.id));
 }
 
 void writeReturn(Compiler* compiler, Node* node)
@@ -374,8 +375,10 @@ void writeCall(Compiler* compiler, Node* node)
     ASSERT_COMPILER(compiler);
     assert(node != nullptr);
 
+    if (writeStdCall(compiler, node)) { return; }
+
     Function* function = getFunction(compiler->table, node->left->data.id);
-    if (function == nullptr && !writeStdCall(compiler, node)) 
+    if (function == nullptr) 
     {
         compileError(compiler, COMPILER_CALL_UNDEFINED_FUNCTION);
         return; 
@@ -411,7 +414,7 @@ bool writeStdCall(Compiler* compiler, Node* node)
     const char* name = node->left->data.id;
     if (strcmp(name, KEYWORDS[PRINT_KEYWORD].name) == 0)
     {
-        writeExpression(compiler, node->right);
+        writeExpression(compiler, node->right->left);
         fprintf(OUTPUT, "out\n");
     } 
     else if (strcmp(name, KEYWORDS[SCAN_KEYWORD].name) == 0)
@@ -420,7 +423,7 @@ bool writeStdCall(Compiler* compiler, Node* node)
     } 
     else if (strcmp(name, KEYWORDS[FLOOR_KEYWORD].name) == 0)
     {
-        writeExpression(compiler, node->right);
+        writeExpression(compiler, node->right->left);
         fprintf(OUTPUT, "flr\n");
     }  
     else 

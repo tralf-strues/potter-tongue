@@ -652,7 +652,9 @@ Node* parsePrint(Parser* parser)
     Node* expression = parseExpression(parser);
     if (expression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_PRINT_EXPRESSION_NEEDED); }
 
-    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[PRINT_KEYWORD].name), expression);
+    Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
+
+    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[PRINT_KEYWORD].name), exprList);
 }
 
 Node* parseFloor(Parser* parser)
@@ -669,7 +671,9 @@ Node* parseFloor(Parser* parser)
 
     REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
 
-    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[FLOOR_KEYWORD].name), expression);
+    Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
+
+    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[FLOOR_KEYWORD].name), exprList);
 }
 
 Node* parseExprList(Parser* parser)

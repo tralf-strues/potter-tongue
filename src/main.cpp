@@ -38,15 +38,15 @@ int main(int argc, char* argv[])
     construct(&parser, &tokenizer);
     parseProgram(&parser, &table, &tree);
 
+    // graphDump(tree);
+    dump(&table);
+
     Compiler compiler = {};
     construct(&compiler, tree, &table);
     if (compile(&compiler, "program.asy") != COMPILER_NO_ERROR)
     {
         printf("Couldn't compile the program.\n");
     }
-
-    // graphDump(tree);
-    dump(&table);
 
     destroy(&table);
     destroy(&tokenizer);

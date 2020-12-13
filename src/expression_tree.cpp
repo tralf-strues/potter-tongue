@@ -207,27 +207,6 @@ void graphDumpSubtree(FILE* file, Node* node)
     const char* constName = nullptr;
     switch (type)
     {
-        // case TYPE_NUMBER:
-        //     constName = getConstantName(node->data.number);
-        //     if (constName != nullptr)
-        //     {
-        //         fprintf(file, "<<B><I>%s</I></B>>, color=\"#75A673\", fillcolor=\"#EDFFED\", fontcolor=\"#75A673\"];\n", constName);
-        //     }
-        //     else
-        //     {
-        //         fprintf(file, "\"%lg\", color=\"#D2691E\", fillcolor=\"#FFFAEF\", fontcolor=\"#FF7F50\"];\n", node->data.number);
-        //     }
-
-        //     break;
-
-        // case TYPE_VAR:
-        //     fprintf(file, "<<B><I>%c</I></B>>, color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"];\n", node->data.var);
-        //     break;
-
-        // case TYPE_OP:
-        //     fprintf(file, "\"%s\", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"];\n", OPERATIONS[node->data.op]);
-        //     break;
-
         case DECL_TYPE: { fprintf(file, "\"D\", color=\"#000000\", "
                                         "fillcolor=\"#FFFFFF\", "
                                         "fontcolor=\"#000000\"];\n");                        break; }
