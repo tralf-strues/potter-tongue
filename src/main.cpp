@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "tokenizer.h"
 #include "parser.h"
+#include "compiler.h"
 #include "../libs/file_manager.h"
 
 #define UTB_DEFINITIONS
@@ -30,12 +31,24 @@ int main(int argc, char* argv[])
     tokenizeBuffer(&tokenizer);
     dumpTokens(tokenizer.tokens, tokenizer.tokensCount);
 
+    SymbolTable table = {};
+    construct(&table);
+
     Parser parser = {};
     construct(&parser, &tokenizer);
-    parseProgram(&parser, &tree);
+    parseProgram(&parser, &table, &tree);
 
-    graphDump(tree);
+    Compiler compiler = {};
+    construct(&compiler, tree, &table);
+    if (compile(&compiler, "program.asy") != COMPILER_NO_ERROR)
+    {
+        printf("Couldn't compile the program.\n");
+    }
 
+    // graphDump(tree);
+    dump(&table);
+
+    destroy(&table);
     destroy(&tokenizer);
     destroy(&parser);
 }

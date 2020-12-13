@@ -12,9 +12,6 @@
 
 ======================================================================*/
 
-// TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#define HERE printf("===HERE?===\n");
-
 #define ASSERT_PARSER(parser) assert(parser                      != nullptr); \
                               assert(parser->tokenizer           != nullptr); \
                               assert(parser->tokenizer           != nullptr); \
@@ -29,6 +26,11 @@
 #define REQUIRE_ID(id)                  if (!requireIdToken(parser, id))                  { return nullptr; }
 #define REQUIRE_KEYWORD(keyword, error) if (!requireKeywordToken(parser, keyword, error)) { return nullptr; }
 #define REQUIRE_NEW_LINES()             if (!requireNewLines(parser))                     { return nullptr; }
+#define REQUIRE_VAR_DECLARED(var)       if (getVarOffset(parser->curFunction, var) == -1)        \
+                                        {                                                        \
+                                            proceed(parser, -1);                                 \
+                                            SYNTAX_ERROR(PARSE_ERROR_VARIABLE_UNDECLARED_USAGE); \
+                                        }
 
 Token* curToken              (Parser* parser);
 void   proceed               (Parser* parser, int step);
@@ -97,9 +99,13 @@ const char* errorString(ParseError error)
         case PARSE_ERROR_NEW_LINE_NEEDED:                    return "new line needed";
 
         case PARSE_ERROR_FUNCTION_DECLARATION_NEEDED:        return "no function declaration found ('imperio')";
+        case PARSE_ERROR_FUNCTION_SECOND_DECLARATION:        return "second declaration of the function";
         case PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED:          return "couldn't find function's arguments";
         case PARSE_ERROR_FUNCTION_BODY_NEEDED:               return "couldn't find function's body";
         case PARSE_ERROR_RETURN_EXPRESSION_NEEDED:           return "couldn't find an expression after 'reverte' operator";
+
+        case PARSE_ERROR_FUNCTION_CALL_ARGS_NEEDED:          return "function call: not enough arguments passed";
+        case PARSE_ERROR_FUNCTION_CALL_EXTRA_ARGS:           return "function call: too many arguments passed";
 
         case PARSE_ERROR_PRINT_EXPRESSION_NEEDED:            return "couldn't find an expression after 'flagrate' operator";
         case PARSE_ERROR_FLOOR_EXPRESSION_NEEDED:            return "couldn't find an expression after 'colloshoo' operator";
@@ -112,7 +118,10 @@ const char* errorString(ParseError error)
         case PARSE_ERROR_LOOP_BLOCK_NEEDED:                  return "couldn't find while operator's body";
 
         case PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT: return "no assignment after declaring a variable";
+        case PARSE_ERROR_VARIABLE_SECOND_DECLARATION:        return "second declaration of the variable";
+        case PARSE_ERROR_VARIABLE_UNDECLARED_USAGE:          return "the variable hasn't been defined";
         case PARSE_ERROR_VARIABLE_ASSIGNMENT_NO_EXPRESSION:  return "no expression after assignment operator 'carpe-retractum'";
+        case PARSE_ERROR_DEREFERENCING_NO_VARIABLE:          return "'legilimens' isn't followed by a variable";
 
         case PARSE_ERROR_OPEN_BRACE_NEEDED:                  return "couldn't find alohomora";
         case PARSE_ERROR_CLOSE_BRACE_NEEDED:                 return "couldn't find colloportus";
@@ -128,6 +137,8 @@ const char* errorString(ParseError error)
         case PARSE_ERROR_INVALID_COMPARISON_OPERATION:       return "there's no such comparison operation";
         case PARSE_ERROR_INVALID_TERM_OPERATION:             return "there's no such term operation";
         case PARSE_ERROR_INVALID_FACTOR_OPERATION:           return "there's no such factor operation";
+
+        case PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS:      return "an expression inside protegos is needed";
     }
 
     return "UNDEFINED error";
@@ -165,8 +176,6 @@ int tokensLeft(Parser* parser)
 {
     assert(parser            != nullptr);
     assert(parser->tokenizer != nullptr);
-
-    // printf("tokensCount = %u, offset = %u\n", parser->tokenizer->tokensCount, parser->offset);
 
     return parser->tokenizer->tokensCount - parser->offset;
 }
@@ -276,10 +285,13 @@ void syntaxError(Parser* parser, ParseError error)
     printf("^\n");
 }
 
-ParseError parseProgram(Parser* parser, Node** root)
+ParseError parseProgram(Parser* parser, SymbolTable* table, Node** root)
 {
     ASSERT_PARSER(parser);
-    assert(root != nullptr);
+    assert(table != nullptr);
+    assert(root  != nullptr);
+
+    parser->table = table;
 
     requireKeywordToken(parser, PROG_START_KEYWORD, PARSE_ERROR_NO_PROG_START);
     requireIdToken(parser, nullptr);
@@ -325,8 +337,14 @@ Node* parseDeclaration(Parser* parser)
     proceed(parser);
 
     Node* declaration = newNode(DECL_TYPE, {}, nullptr, parseId(parser));
-
     if (declaration->right == nullptr) { SYNTAX_ERROR(PARSE_ERROR_ID_NEEDED); }
+
+    if (getFunction(parser->table, declaration->right->data.id) != nullptr)
+    {
+        SYNTAX_ERROR(PARSE_ERROR_FUNCTION_SECOND_DECLARATION);
+    }
+
+    parser->curFunction = pushFunction(parser->table, declaration->right->data.id);
 
     Node* args = parseArgList(parser);
 
@@ -368,7 +386,6 @@ Node* parseBlock(Parser* parser)
         statement = statement->right;
     }
 
-    // REQUIRE_NEW_LINES();
     REQUIRE_KEYWORD(CLOSE_BRACE_KEYWORD, PARSE_ERROR_CLOSE_BRACE_NEEDED);
     REQUIRE_NEW_LINES();
 
@@ -406,7 +423,6 @@ Node* parseCmdLine(Parser* parser)
 
     if (node == nullptr) { node = parseVDeclaration(parser); }
     if (node == nullptr) { node = parseAssignment(parser);   }
-    if (node == nullptr) { node = parseCall(parser);         }
     if (node == nullptr) { node = parseJump(parser);         }
     if (node == nullptr) { node = parsePrint(parser);        }
     if (node == nullptr) { return nullptr;                   }
@@ -511,38 +527,47 @@ Node* parseFactor(Parser* parser)
     
     Node* factor = nullptr;
 
-    if (isKeyword(curToken(parser), BRACKET_KEYWORD))
-    {
-        proceed(parser);
-
-        factor = parseExpression(parser);
-        if (factor == nullptr) { SYNTAX_ERROR(PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS); }
-
-        REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
-    }
-    else if (isNumberType(curToken(parser)))
+    if (isNumberType(curToken(parser)))
     {
         factor = parseNumber(parser);
     }
-    else if (isKeyword(curToken(parser), DEREF_KEYWORD))
+    else
     {
-        proceed(parser);
+        KeywordCode curKeyword = curToken(parser)->data.keywordCode;
 
-        factor = parseId(parser);
-        if (factor == nullptr) { SYNTAX_ERROR(PARSE_ERROR_DEREFERENCING_NO_VARIABLE); }
-    }
-    else if (isKeyword(curToken(parser), CALL_KEYWORD))
-    {
-        factor = parseCall(parser);
-    }
-    else if (isKeyword(curToken(parser), FLOOR_KEYWORD))
-    {
-        factor = parseFloor(parser);
-    }
-    else if (isKeyword(curToken(parser), SCAN_KEYWORD))
-    {
-        factor = newNode(CALL_TYPE, {}, NAME(KEYWORDS[SCAN_KEYWORD].name), nullptr);
-        proceed(parser);
+        switch (curToken(parser)->data.keywordCode)
+        {
+            case BRACKET_KEYWORD:
+            {
+                proceed(parser);
+                factor = parseExpression(parser);
+                if (factor == nullptr) { SYNTAX_ERROR(PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS); }
+        
+                REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
+                break;
+            }
+
+            case DEREF_KEYWORD:
+            {
+                proceed(parser);
+                factor = parseId(parser);
+                if (factor == nullptr) { SYNTAX_ERROR(PARSE_ERROR_DEREFERENCING_NO_VARIABLE); }
+        
+                REQUIRE_VAR_DECLARED(factor->data.id);
+
+                break;
+            }
+
+            case CALL_KEYWORD:  { factor = parseCall(parser);  break; }
+            case FLOOR_KEYWORD: { factor = parseFloor(parser); break; }
+
+            case SCAN_KEYWORD:
+            {
+                factor = newNode(CALL_TYPE, {}, NAME(KEYWORDS[SCAN_KEYWORD].name), nullptr);
+                proceed(parser);
+                break;
+            }
+        }
     }
 
     return factor;
@@ -556,11 +581,15 @@ Node* parseVDeclaration(Parser* parser)
 
     proceed(parser);
 
+    if (!isIdType(curToken(parser))) { SYNTAX_ERROR(PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT); }
+
+    const char* id = curToken(parser)->data.id;
+    if (getVarOffset(parser->curFunction, id) != -1) { SYNTAX_ERROR(PARSE_ERROR_VARIABLE_SECOND_DECLARATION); }
+
+    pushVariable(parser->curFunction, id);
+
     Node* declaration = parseAssignment(parser);
-    if (declaration == nullptr) 
-    {
-        SYNTAX_ERROR(PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT); 
-    }
+    if (declaration == nullptr) { SYNTAX_ERROR(PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT); }
 
     return declaration;
 }
@@ -576,6 +605,7 @@ Node* parseAssignment(Parser* parser)
     }
 
     Node* variable = parseId(parser);
+    REQUIRE_VAR_DECLARED(variable->data.id);
     REQUIRE_KEYWORD(ASSGN_KEYWORD, PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT);
 
     Node* expression = parseExpression(parser);
@@ -645,9 +675,11 @@ Node* parseFloor(Parser* parser)
 Node* parseExprList(Parser* parser)
 {
     ASSERT_PARSER(parser);
-        
+
     Node* expression = parseExpression(parser);
     if (expression == nullptr) { return nullptr; }
+
+    Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
 
     while (isKeyword(curToken(parser), COMMA_KEYWORD))
     {
@@ -656,11 +688,10 @@ Node* parseExprList(Parser* parser)
         Node* nextExpression = parseExpression(parser);
         if (nextExpression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED); }
 
-        setRight(nextExpression, expression);
-        expression = nextExpression;
+        exprList = newNode(LIST_TYPE, {}, nextExpression, exprList);
     }
 
-    return expression;
+    return exprList;
 }
 
 Node* parseArgList(Parser* parser)
@@ -671,6 +702,7 @@ Node* parseArgList(Parser* parser)
     if (arg == nullptr) { return nullptr; }
 
     Node* prevArg = arg;
+    pushArgument(parser->curFunction, prevArg->data.id);
 
     while (isKeyword(curToken(parser), COMMA_KEYWORD))
     {
@@ -680,6 +712,7 @@ Node* parseArgList(Parser* parser)
         if (prevArg->right == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED); }
 
         prevArg = prevArg->right;
+        pushArgument(parser->curFunction, prevArg->data.id);
     }
 
     return arg;
@@ -714,23 +747,21 @@ Node* parseCondition(Parser* parser)
 
     REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
 
-    Node* conditionRoot = newNode(COND_TYPE, {}, expression, nullptr);
-
     Node* trueBlock = parseBlock(parser);
     if (trueBlock == nullptr) { SYNTAX_ERROR(PARSE_ERROR_IF_BLOCK_NEEDED); }
+    
+    Node* conditionRoot = newNode(COND_TYPE, {}, expression, newNode(IFEL_TYPE, {}, trueBlock, nullptr));
 
-    if (!isKeyword(curToken(parser), ELSE_KEYWORD))
+    if (isKeyword(curToken(parser), ELSE_KEYWORD))
     {
-        setRight(conditionRoot, trueBlock);
-        return conditionRoot;
+        proceed(parser);
+
+        Node* falseBlock = parseBlock(parser);
+        if (falseBlock == nullptr) { SYNTAX_ERROR(PARSE_ERROR_ELSE_BLOCK_NEEDED); }
+
+        setRight(conditionRoot->right, falseBlock);
     }
 
-    proceed(parser);
-
-    Node* falseBlock = parseBlock(parser);
-    if (falseBlock == nullptr) { SYNTAX_ERROR(PARSE_ERROR_ELSE_BLOCK_NEEDED); }
-
-    setRight(conditionRoot, newNode(IFEL_TYPE, {}, trueBlock, falseBlock));
     return conditionRoot;
 }  
 

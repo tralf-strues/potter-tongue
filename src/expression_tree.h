@@ -22,11 +22,8 @@ enum NodeType
     ASSG_TYPE,
 
     CALL_TYPE,
+    LIST_TYPE,
     JUMP_TYPE,
-
-    // ECHO_TYPE,
-    // SCAN_TYPE,
-    // _FLR_TYPE,
 
     MATH_TYPE,
     NUMB_TYPE,

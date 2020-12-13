@@ -46,7 +46,7 @@ ProgramBody ::= {Declaration}+
 Declaration ::= 'imperio' Var horcrux Block | 'imperio' Var ArgList Block
 Block       ::= NewLines 'alohomora' NewLines Statement* NewLines 'colloportus' NewLines
 Statement   ::= CmdLine | Condition | Loop 
-CmdLine     ::= - [Expression, VDec, Assignment, Call, Jump, Print] NewLines
+CmdLine     ::= - [Expression, VDec, Assignment, Jump, Print] NewLines
 Expression  ::= Comparand {[<, >, ==, !=, <=, >=] Comparand}*
 Comparand   ::= Term {[+, -] Term}*
 Term        ::= Factor {[*, /] Factor}*

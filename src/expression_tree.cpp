@@ -255,6 +255,7 @@ void graphDumpSubtree(FILE* file, Node* node)
         case ASSG_TYPE: { fprintf(file, "\"=\"];\n");                                        break; } 
 
         case CALL_TYPE: { fprintf(file, "\"call\"];\n");                                     break; } 
+        case LIST_TYPE: { fprintf(file, "\"param\"];\n");                                    break; } 
         case JUMP_TYPE: { fprintf(file, "\"return\"];\n");                                   break; } 
 
         case MATH_TYPE: { fprintf(file, "\"%s\"];\n", mathOpToString(node->data.operation)); break; } 

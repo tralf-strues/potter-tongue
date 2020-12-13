@@ -2,6 +2,7 @@
 
 #include "tokenizer.h"
 #include "expression_tree.h"
+#include "symbol_table.h"
 
 enum ParseError
 {
@@ -12,9 +13,13 @@ enum ParseError
     PARSE_ERROR_NEW_LINE_NEEDED,
 
     PARSE_ERROR_FUNCTION_DECLARATION_NEEDED,
+    PARSE_ERROR_FUNCTION_SECOND_DECLARATION,
     PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED,
     PARSE_ERROR_FUNCTION_BODY_NEEDED,
     PARSE_ERROR_RETURN_EXPRESSION_NEEDED,
+
+    PARSE_ERROR_FUNCTION_CALL_ARGS_NEEDED,
+    PARSE_ERROR_FUNCTION_CALL_EXTRA_ARGS,
 
     PARSE_ERROR_PRINT_EXPRESSION_NEEDED,
     PARSE_ERROR_FLOOR_EXPRESSION_NEEDED,
@@ -27,7 +32,10 @@ enum ParseError
     PARSE_ERROR_LOOP_BLOCK_NEEDED,
 
     PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT,
+    PARSE_ERROR_VARIABLE_SECOND_DECLARATION,
+    PARSE_ERROR_VARIABLE_UNDECLARED_USAGE,
     PARSE_ERROR_VARIABLE_ASSIGNMENT_NO_EXPRESSION,
+    PARSE_ERROR_DEREFERENCING_NO_VARIABLE,
 
     PARSE_ERROR_OPEN_BRACE_NEEDED,
     PARSE_ERROR_CLOSE_BRACE_NEEDED,
@@ -44,21 +52,20 @@ enum ParseError
     PARSE_ERROR_INVALID_TERM_OPERATION,
     PARSE_ERROR_INVALID_FACTOR_OPERATION,
 
-    PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS,
-
-    PARSE_ERROR_DEREFERENCING_NO_VARIABLE,
+    PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS
 };
 
 struct Parser
 {
-    Tokenizer* tokenizer;
-    size_t     offset;
-    ParseError status;
+    Tokenizer*   tokenizer;
+    size_t       offset;
+    ParseError   status;
+
+    SymbolTable* table;
+    Function*    curFunction;
 };
 
 void        construct    (Parser* parser, Tokenizer* tokenizer);
 void        destroy      (Parser* parser);
-
 const char* errorString  (ParseError error);
-
-ParseError  parseProgram (Parser* parser, Node** root);
+ParseError  parseProgram (Parser* parser, SymbolTable* table, Node** root);

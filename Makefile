@@ -1,6 +1,8 @@
-Options =  
+Options = -std=c++2a
 
-# -Wpedantic -Wall -std=c++2a
+# qwerty1337
+
+# -Wpedantic -Wall 
 
 # Godric's-Hollow factorial
 
@@ -33,7 +35,7 @@ LibDir = libs
 
 LIBS = $(wildcard $(LibDir)/*.a)
 DEPS = $(wildcard $(SrcDir)/*.h) $(wildcard $(LibDir)/*.h)
-OBJS = $(IntDir)/main.o $(IntDir)/syntax.o $(IntDir)/tokenizer.o $(IntDir)/expression_tree.o $(IntDir)/parser.o 
+OBJS = $(IntDir)/main.o $(IntDir)/syntax.o $(IntDir)/tokenizer.o $(IntDir)/expression_tree.o $(IntDir)/parser.o $(IntDir)/symbol_table.o $(IntDir)/compiler.o 
 
 $(BinDir)/compiler.exe: $(OBJS) $(LIBS) $(DEPS)
 	g++ -o $(BinDir)/compiler.exe $(OBJS) $(LIBS)
@@ -52,3 +54,9 @@ $(IntDir)/expression_tree.o: $(SrcDir)/expression_tree.cpp $(DEPS)
 
 $(IntDir)/parser.o: $(SrcDir)/parser.cpp $(DEPS)
 	g++ -o $(IntDir)/parser.o -c $(SrcDir)/parser.cpp $(Options)
+
+$(IntDir)/symbol_table.o: $(SrcDir)/symbol_table.cpp $(DEPS)
+	g++ -o $(IntDir)/symbol_table.o -c $(SrcDir)/symbol_table.cpp $(Options)
+
+$(IntDir)/compiler.o: $(SrcDir)/compiler.cpp $(DEPS)
+	g++ -o $(IntDir)/compiler.o -c $(SrcDir)/compiler.cpp $(Options)
