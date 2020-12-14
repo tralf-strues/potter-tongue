@@ -2,9 +2,6 @@
 #include <string.h>
 #include "compiler.h"
 
-// TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-#define HERE printf("===HERE?===\n");
-
 #define ASSERT_COMPILER(compiler) assert(compiler        != nullptr); \
                                   assert(compiler->table != nullptr); \
                                   assert(compiler->file  != nullptr); \
@@ -57,13 +54,9 @@ void destroy(Compiler* compiler)
 
 const char* errorString(CompilerError error)
 {
-    switch (error)
+    if (error < COMPILER_ERRORS_COUNT)
     {
-        case COMPILER_NO_ERROR:                return "no error";
-
-        case COMPILER_ERROR_FILE_OPEN_FAILURE: return "couldn't open file to write output to";
-        case COMPILER_ERROR_NO_MAIN_FUNCTION:  return "main function ('love') wasn't found";
-        case COMPILER_CALL_UNDEFINED_FUNCTION: return "calling undefined function";
+        return COMPILER_ERROR_STRINGS[error];
     }
 
     return "UNDEFINED error";
@@ -97,6 +90,10 @@ CompilerError compile(Compiler* compiler, const char* outputFile)
     }
 
     CUR_FUNC = compiler->table->functions;
+
+    fprintf(OUTPUT, "call :love\n"
+                    "out\n"
+                    "hlt\n\n");
 
     Node* curDeclaration = compiler->tree;
     while (curDeclaration != nullptr)
@@ -156,6 +153,8 @@ void writeFunctionHeader(Compiler* compiler)
 
     fprintf(OUTPUT, "\n");
     writeHorizontalLine(compiler);
+
+    fprintf(OUTPUT, "%s:\n", CUR_FUNC->name);
 }
 
 void writeFunction(Compiler* compiler, Node* node)
@@ -167,7 +166,7 @@ void writeFunction(Compiler* compiler, Node* node)
 
     for (size_t i = 0; i < CUR_FUNC->argsCount; i++)
     {
-        fprintf(OUTPUT, "pop [rax + %u]\n", 2 + i);
+        fprintf(OUTPUT, "pop [rax+%u]\n", 2 + i);
     }
 
     fprintf(OUTPUT, "\n");
@@ -265,7 +264,7 @@ void writeAssignment(Compiler* compiler, Node* node)
 
     writeExpression(compiler, node->right);
 
-    fprintf(OUTPUT, "pop [rax + %u]\n\n", 2 + getVarOffset(CUR_FUNC, node->left->data.id));
+    fprintf(OUTPUT, "pop [rax+%u]\n\n", 2 + getVarOffset(CUR_FUNC, node->left->data.id));
 }
 
 void writeReturn(Compiler* compiler, Node* node)
@@ -367,7 +366,7 @@ void writeVar(Compiler* compiler, Node* node)
     ASSERT_COMPILER(compiler);
     assert(node != nullptr);
 
-    fprintf(OUTPUT, "push [rax + %u]\n", 2 + getVarOffset(CUR_FUNC, node->data.id));
+    fprintf(OUTPUT, "push [rax+%u]\n", 2 + getVarOffset(CUR_FUNC, node->data.id));
 }
 
 void writeCall(Compiler* compiler, Node* node)
@@ -380,7 +379,7 @@ void writeCall(Compiler* compiler, Node* node)
     Function* function = getFunction(compiler->table, node->left->data.id);
     if (function == nullptr) 
     {
-        compileError(compiler, COMPILER_CALL_UNDEFINED_FUNCTION);
+        compileError(compiler, COMPILER_ERROR_CALL_UNDEFINED_FUNCTION);
         return; 
     }
 
@@ -392,14 +391,14 @@ void writeCall(Compiler* compiler, Node* node)
     }
 
     fprintf(OUTPUT, "; calling %s\n"
-                    "push [rax + 1]\n"
+                    "push [rax+1]\n"
                     "push rax\n"
-                    "push [rax + 1]\n"
+                    "push [rax+1]\n"
                     "add\n"
                     "pop rax\n"
                     "pop [rax]\n"
                     "push %u\n"
-                    "pop [rax + 1]\n"
+                    "pop [rax+1]\n"
                     "call :%s\n\n",
                     function->name,
                     function->varsCount + 2,

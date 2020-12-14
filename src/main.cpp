@@ -9,8 +9,6 @@
 #define UTB_DEFINITIONS
 #include "../libs/utilib.h"
 
-bool loadFile(const char* filename, char** buffer, size_t* bufferSize);
-
 int main(int argc, char* argv[])
 {
     if (argc <= 1) { printf("Filename unspecified\n"); return -1; }
@@ -36,51 +34,37 @@ int main(int argc, char* argv[])
 
     Parser parser = {};
     construct(&parser, &tokenizer);
-    parseProgram(&parser, &table, &tree);
-
-    // graphDump(tree);
-    dump(&table);
+    if (parseProgram(&parser, &table, &tree) != PARSE_NO_ERROR)
+    {
+        printf("Couldn't compile the program.\n");
+        return -1;
+    }
 
     Compiler compiler = {};
     construct(&compiler, tree, &table);
     if (compile(&compiler, "program.asy") != COMPILER_NO_ERROR)
     {
         printf("Couldn't compile the program.\n");
+        return -1;
     }
+
+    // graphDump(tree);
+    dump(&table);
+
+    FILE* file = fopen("dumped_tree.txt", "w");
+    assert(file != nullptr);
+
+    dumpToFile(file, tree);
+
+    fclose(file);
 
     destroy(&table);
     destroy(&tokenizer);
     destroy(&parser);
-}
 
-bool loadFile(const char* filename, char** buffer, size_t* bufferSize)
-{
-    assert(filename   != nullptr);
-    assert(buffer     != nullptr);
-    assert(bufferSize != nullptr);
+    Node* readTree = readTreeFromFile("dumped_tree.txt");
+    assert(readTree != nullptr);
+    graphDump(readTree);
 
-    FILE* file = fopen(filename, "r");
-    if (file == nullptr) { return false; }
-
-    size_t fileSize = getFileSize(filename);
-
-    *buffer = (char*) calloc(fileSize + 1, sizeof(char));
-    assert(*buffer != nullptr);
-
-    *bufferSize = fread(*buffer, sizeof(char), fileSize, file);
-    if (*bufferSize == 0) 
-    {
-        fclose(file);
-        free(*buffer);
-
-        *buffer = nullptr;
-
-        return false;
-    }
-
-    *(*buffer + *bufferSize) = '\0';
-
-    fclose(file);
-
-    return true;
+    return 0;
 }

@@ -8,7 +8,7 @@
 /*====================================================================
  TODO
 - Use program's name
-- Make an array of error strings
++ Make an array of error strings
 
 ======================================================================*/
 
@@ -32,41 +32,41 @@
                                             SYNTAX_ERROR(PARSE_ERROR_VARIABLE_UNDECLARED_USAGE); \
                                         }
 
-Token* curToken              (Parser* parser);
-void   proceed               (Parser* parser, int step);
-void   proceed               (Parser* parser);
-int    tokensLeft            (Parser* parser);
-bool   isEndReached          (Parser* parser);
+Token* curToken            (Parser* parser);
+void   proceed             (Parser* parser, int step);
+void   proceed             (Parser* parser);
+int    tokensLeft          (Parser* parser);
+bool   isEndReached        (Parser* parser);
 
-bool   requireIdToken        (Parser* parser, const char* id);
-bool   requireKeywordToken   (Parser* parser, KeywordCode keywordCode, ParseError error);
-bool   requireNewLines       (Parser* parser);
+bool   requireIdToken      (Parser* parser, const char* id);
+bool   requireKeywordToken (Parser* parser, KeywordCode keywordCode, ParseError error);
+bool   requireNewLines     (Parser* parser);
 
-void   syntaxError           (Parser* parser, ParseError error);
+void   syntaxError         (Parser* parser, ParseError error);
 
-Node*  parseProgramBody      (Parser* parser);
-Node*  parseDeclaration      (Parser* parser);
-Node*  parseBlock            (Parser* parser);
-Node*  parseStatement        (Parser* parser);
-Node*  parseCmdLine          (Parser* parser);
+Node*  parseProgramBody    (Parser* parser);
+Node*  parseDeclaration    (Parser* parser);
+Node*  parseBlock          (Parser* parser);
+Node*  parseStatement      (Parser* parser);
+Node*  parseCmdLine        (Parser* parser);
 
-Node*  parseExpression       (Parser* parser);
-Node*  parseComparand        (Parser* parser);
-Node*  parseTerm             (Parser* parser);
-Node*  parseFactor           (Parser* parser);
+Node*  parseExpression     (Parser* parser);
+Node*  parseComparand      (Parser* parser);
+Node*  parseTerm           (Parser* parser);
+Node*  parseFactor         (Parser* parser);
 
-Node*  parseVDeclaration     (Parser* parser);
-Node*  parseAssignment       (Parser* parser);
-Node*  parseCall             (Parser* parser);
-Node*  parsePrint            (Parser* parser);
-Node*  parseFloor            (Parser* parser);
-Node*  parseExprList         (Parser* parser);
-Node*  parseArgList          (Parser* parser);
-Node*  parseJump             (Parser* parser);
-Node*  parseCondition        (Parser* parser);
-Node*  parseLoop             (Parser* parser);
-Node*  parseNumber           (Parser* parser);
-Node*  parseId               (Parser* parser);
+Node*  parseVDeclaration   (Parser* parser);
+Node*  parseAssignment     (Parser* parser);
+Node*  parseCall           (Parser* parser);
+Node*  parsePrint          (Parser* parser);
+Node*  parseFloor          (Parser* parser);
+Node*  parseExprList       (Parser* parser);
+Node*  parseArgList        (Parser* parser);
+Node*  parseJump           (Parser* parser);
+Node*  parseCondition      (Parser* parser);
+Node*  parseLoop           (Parser* parser);
+Node*  parseNumber         (Parser* parser);
+Node*  parseId             (Parser* parser);
 
 void construct(Parser* parser, Tokenizer* tokenizer)
 {
@@ -90,55 +90,9 @@ void destroy(Parser* parser)
 
 const char* errorString(ParseError error)
 {
-    switch (error)
+    if (error < PARSE_ERRORS_COUNT)
     {
-        case PARSE_NO_ERROR:                                 return "no error";
-
-        case PARSE_ERROR_NO_PROG_START:                      return "no program start ('Godric's-Hollow') found";
-        case PARSE_ERROR_NO_PROG_END:                        return "no program end ('Privet-Drive') found";
-        case PARSE_ERROR_NEW_LINE_NEEDED:                    return "new line needed";
-
-        case PARSE_ERROR_FUNCTION_DECLARATION_NEEDED:        return "no function declaration found ('imperio')";
-        case PARSE_ERROR_FUNCTION_SECOND_DECLARATION:        return "second declaration of the function";
-        case PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED:          return "couldn't find function's arguments";
-        case PARSE_ERROR_FUNCTION_BODY_NEEDED:               return "couldn't find function's body";
-        case PARSE_ERROR_RETURN_EXPRESSION_NEEDED:           return "couldn't find an expression after 'reverte' operator";
-
-        case PARSE_ERROR_FUNCTION_CALL_ARGS_NEEDED:          return "function call: not enough arguments passed";
-        case PARSE_ERROR_FUNCTION_CALL_EXTRA_ARGS:           return "function call: too many arguments passed";
-
-        case PARSE_ERROR_PRINT_EXPRESSION_NEEDED:            return "couldn't find an expression after 'flagrate' operator";
-        case PARSE_ERROR_FLOOR_EXPRESSION_NEEDED:            return "couldn't find an expression after 'colloshoo' operator";
-
-        case PARSE_ERROR_IF_EXPRESSION_NEEDED:               return "revelio operator needs a condition";
-        case PARSE_ERROR_IF_BLOCK_NEEDED:                    return "couldn't find revelio operator's body";
-        case PARSE_ERROR_ELSE_BLOCK_NEEDED:                  return "couldn't find otherwise operator's body";
-
-        case PARSE_ERROR_LOOP_EXPRESSION_NEEDED:             return "while operator needs a condition";
-        case PARSE_ERROR_LOOP_BLOCK_NEEDED:                  return "couldn't find while operator's body";
-
-        case PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT: return "no assignment after declaring a variable";
-        case PARSE_ERROR_VARIABLE_SECOND_DECLARATION:        return "second declaration of the variable";
-        case PARSE_ERROR_VARIABLE_UNDECLARED_USAGE:          return "the variable hasn't been defined";
-        case PARSE_ERROR_VARIABLE_ASSIGNMENT_NO_EXPRESSION:  return "no expression after assignment operator 'carpe-retractum'";
-        case PARSE_ERROR_DEREFERENCING_NO_VARIABLE:          return "'legilimens' isn't followed by a variable";
-
-        case PARSE_ERROR_OPEN_BRACE_NEEDED:                  return "couldn't find alohomora";
-        case PARSE_ERROR_CLOSE_BRACE_NEEDED:                 return "couldn't find colloportus";
-        case PARSE_ERROR_BRACKET_NEEDED:                     return "couldn't find protego";
-
-        case PARSE_ERROR_ID_NEEDED:                          return "couldn't find a name";
-        case PARSE_ERROR_INVALID_ID:                         return "invalid name";
-
-        case PARSE_ERROR_COMPARAND_NOT_FOUND:                return "couldn't find a comparand";
-        case PARSE_ERROR_TERM_NOT_FOUND:                     return "couldn't find a term";
-        case PARSE_ERROR_FACTOR_NOT_FOUND:                   return "couldn't find a factor";
-
-        case PARSE_ERROR_INVALID_COMPARISON_OPERATION:       return "there's no such comparison operation";
-        case PARSE_ERROR_INVALID_TERM_OPERATION:             return "there's no such term operation";
-        case PARSE_ERROR_INVALID_FACTOR_OPERATION:           return "there's no such factor operation";
-
-        case PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS:      return "an expression inside protegos is needed";
+        return PARSE_ERROR_STRINGS[error];
     }
 
     return "UNDEFINED error";
@@ -591,6 +545,8 @@ Node* parseVDeclaration(Parser* parser)
     Node* declaration = parseAssignment(parser);
     if (declaration == nullptr) { SYNTAX_ERROR(PARSE_ERROR_VARIABLE_DECLARATION_NO_ASSIGNMENT); }
 
+    declaration->type = VDECL_TYPE;
+
     return declaration;
 }
 
@@ -812,5 +768,4 @@ Node* parseId(Parser* parser)
     proceed(parser);
 
     return newNode(NAME_TYPE, { .id = id }, nullptr, nullptr);
-    
 }

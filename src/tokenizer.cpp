@@ -9,8 +9,6 @@
                                     assert((tokenizer)->position != nullptr); \
                                     assert((tokenizer)->tokens   != nullptr); 
 
-
-const char*  LETTERS          = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const size_t MAX_TOKENS_COUNT = 8192;
 
 bool   finished        (Tokenizer* tokenizer);
@@ -21,7 +19,6 @@ bool   processKeyword  (Tokenizer* tokenizer);
 bool   isKeywordNumber (Keyword keyword);
 double keywordToNumber (Keyword keyword);
 bool   processId       (Tokenizer* tokenizer);
-char*  copyString      (const char* string, size_t length);
 
 void construct(Tokenizer* tokenizer, const char* buffer, size_t bufferSize)
 {
@@ -239,19 +236,6 @@ bool processId(Tokenizer* tokenizer)
     return true;
 }
 
-char* copyString(const char* string, size_t length)
-{
-    assert(string != nullptr);
-
-    char* newString = (char*) calloc(length + 1, sizeof(char));
-    assert(newString != nullptr);
-
-    strncpy(newString, string, length);
-    newString[length] = '\0';
-
-    return newString;
-}
-
 void dumpTokens(Token* tokens, size_t count)
 {
     assert(tokens != nullptr);
@@ -277,7 +261,6 @@ void dumpTokens(Token* tokens, size_t count)
         }
         else
         {
-            // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
             size_t length = strcspn(tokens[i].pos, "\n");
             printf("    pos  = '%.*s'\n\n", length, tokens[i].pos);
         }

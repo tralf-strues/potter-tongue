@@ -14,6 +14,8 @@ struct BinFileHeader
 };
 
 size_t getFileSize             (const char* fileName);
+bool   loadFile                (const char* filename, char** buffer, size_t* bufferSize);
+
 Text*  copyText                (Text* text);
 Text*  readTextFromFile        (const char* fileName);
 bool   writeTextToFile         (FILE* file, Text* text);

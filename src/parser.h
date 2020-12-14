@@ -52,7 +52,59 @@ enum ParseError
     PARSE_ERROR_INVALID_TERM_OPERATION,
     PARSE_ERROR_INVALID_FACTOR_OPERATION,
 
-    PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS
+    PARSE_ERROR_NO_EXPRESSION_INSIDE_BRACKETS,
+
+    PARSE_ERRORS_COUNT
+};
+
+static const char* PARSE_ERROR_STRINGS[PARSE_ERRORS_COUNT] = {
+    "no error",
+
+    "no program start ('Godric's-Hollow') found",
+    "no program end ('Privet-Drive') found",
+    "new line needed",
+
+    "no function declaration found ('imperio')",
+    "second declaration of the function",
+    "couldn't find function's arguments",
+    "couldn't find function's body",
+    "couldn't find an expression after 'reverte' operator",
+
+    "function call: not enough arguments passed",
+    "function call: too many arguments passed",
+
+    "couldn't find an expression after 'flagrate' operator",
+    "couldn't find an expression after 'colloshoo' operator",
+
+    "revelio operator needs a condition",
+    "couldn't find revelio operator's body",
+    "couldn't find otherwise operator's body",
+
+    "while operator needs a condition",
+    "couldn't find while operator's body",
+
+    "no assignment after declaring a variable",
+    "second declaration of the variable",
+    "the variable hasn't been defined",
+    "no expression after assignment operator 'carpe-retractum'",
+    "'legilimens' isn't followed by a variable",
+
+    "couldn't find alohomora",
+    "couldn't find colloportus",
+    "couldn't find protego",
+
+    "couldn't find a name",
+    "invalid name",
+
+    "couldn't find a comparand",
+    "couldn't find a term",
+    "couldn't find a factor",
+
+    "there's no such comparison operation",
+    "there's no such term operation",
+    "there's no such factor operation",
+
+    "an expression inside protegos is needed"
 };
 
 struct Parser
@@ -69,3 +121,4 @@ void        construct    (Parser* parser, Tokenizer* tokenizer);
 void        destroy      (Parser* parser);
 const char* errorString  (ParseError error);
 ParseError  parseProgram (Parser* parser, SymbolTable* table, Node** root);
+

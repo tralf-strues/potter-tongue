@@ -75,7 +75,7 @@ struct Keyword
     KeywordCode code;
 };
 
-static const char*   MAIN_FUNCTION_NAME = "love";
+static const char* MAIN_FUNCTION_NAME = "love";
 
 static const Keyword KEYWORDS[KEYWORDS_COUNT] = {
     { "Godric's-Hollow", 15, PROG_START_KEYWORD    },
