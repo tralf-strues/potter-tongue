@@ -7,8 +7,31 @@
 #include "../libs/utilib.h"
 #include "../libs/file_manager.h"
 
-const size_t MAX_FILENAME_LENGTH = 128;
-const size_t MAX_COMMAND_LENGTH  = 256;
+const size_t MAX_FILENAME_LENGTH  = 128;
+const size_t MAX_COMMAND_LENGTH   = 256;
+
+const char*  DECL_GRAPH_STYLE     = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
+const char*  BLCK_GRAPH_STYLE     = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
+const char*  STAT_GRAPH_STYLE     = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
+const char*  COND_GRAPH_STYLE     = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
+const char*  IFEL_GRAPH_STYLE     = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
+const char*  LOOP_GRAPH_STYLE     = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
+const char*  ASSG_GRAPH_STYLE     = "";
+const char*  CALL_GRAPH_STYLE     = "";
+const char*  LIST_GRAPH_STYLE     = "";
+const char*  JUMP_GRAPH_STYLE     = "";
+const char*  MATH_GRAPH_STYLE     = "";
+const char*  NUMB_GRAPH_STYLE     = ", color=\"#D2691E\", fillcolor=\"#FFFAEF\", fontcolor=\"#FF7F50\"";
+const char*  NAME_GRAPH_STYLE     = ", color=\"#75A673\", fillcolor=\"#EDFFED\", fontcolor=\"#75A673\"";
+
+const char*  UNIVERSAL_MAIN_NAME  = "main";
+const char*  UNIVERSAL_PRINT_NAME = "print";
+const char*  UNIVERSAL_SCAN_NAME  = "scan";
+const char*  UNIVERSAL_FLOOR_NAME = "floor";
+
+const size_t FIRST_DECL_LENGTH    = strlen("0 | 0");
+const size_t LEAF_CHILDREN_LENGTH = strlen("{ } { }");
+const size_t LEFT_CHILD_LENGTH    = strlen("{ } { ");
 
 #define CHECK_NULL(value, action) if (value == nullptr) { action; }
 
@@ -35,12 +58,12 @@ Node* newNode(NodeType type, NodeData data, Node* left, Node* right)
     Node* node = newNode();
     CHECK_NULL(node, return nullptr);
 
-    node->type    = type;
-    node->data    = data;
+    node->type   = type;
+    node->data   = data;
 
-    node->parent  = nullptr;
-    node->left    = left;
-    node->right   = right;
+    node->parent = nullptr;
+    node->left   = left;
+    node->right  = right;
 
     if (left  != nullptr) { left->parent  = node; }
     if (right != nullptr) { right->parent = node; }
@@ -196,20 +219,6 @@ void graphDump(Node* root)
     system(dotCmd);
 }
 
-const char* DECL_GRAPH_STYLE  = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
-const char* BLCK_GRAPH_STYLE  = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
-const char* STAT_GRAPH_STYLE  = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
-const char* COND_GRAPH_STYLE  = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
-const char* IFEL_GRAPH_STYLE  = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
-const char* LOOP_GRAPH_STYLE  = ", color=\"#367ACC\", fillcolor=\"#E0F5FF\", fontcolor=\"#4881CC\"";
-const char* ASSG_GRAPH_STYLE  = "";
-const char* CALL_GRAPH_STYLE  = "";
-const char* LIST_GRAPH_STYLE  = "";
-const char* JUMP_GRAPH_STYLE  = "";
-const char* MATH_GRAPH_STYLE  = "";
-const char* NUMB_GRAPH_STYLE  = ", color=\"#D2691E\", fillcolor=\"#FFFAEF\", fontcolor=\"#FF7F50\"";
-const char* NAME_GRAPH_STYLE  = ", color=\"#75A673\", fillcolor=\"#EDFFED\", fontcolor=\"#75A673\"";
-
 void graphDumpSubtree(FILE* file, Node* node)
 {
     assert(file != nullptr);
@@ -264,11 +273,6 @@ void graphDumpSubtree(FILE* file, Node* node)
     graphDumpSubtree(file, node->left);
     graphDumpSubtree(file, node->right);
 }
-
-const char* UNIVERSAL_MAIN_NAME  = "main";
-const char* UNIVERSAL_PRINT_NAME = "print";
-const char* UNIVERSAL_SCAN_NAME  = "scan";
-const char* UNIVERSAL_FLOOR_NAME = "floor";
 
 void dumpToFile(FILE* file, Node* node)
 {
@@ -330,7 +334,7 @@ Node* readTreeFromFile(const char* filename)
     }
 
     Node* node = newNode(DECL_TYPE, {}, nullptr, nullptr);
-    ofs += 5; // to skip the first decl info
+    ofs += FIRST_DECL_LENGTH; // to skip the first decl info
 
     while (ofs < bufferSize)
     {
@@ -338,17 +342,17 @@ Node* readTreeFromFile(const char* filename)
 
         if (buffer[ofs] == '{')
         {
-            if (ofs + 7 < bufferSize && strncmp(buffer + ofs, "{ } { }", 7) == 0)
+            if (ofs + LEAF_CHILDREN_LENGTH < bufferSize && strncmp(buffer + ofs, "{ } { }", LEAF_CHILDREN_LENGTH) == 0)
             {
-                ofs += 7;
+                ofs += LEAF_CHILDREN_LENGTH;
                 continue;
             }
 
-            if (ofs + 6 < bufferSize && strncmp(buffer + ofs, "{ } { ", 6) == 0)
+            if (ofs + LEFT_CHILD_LENGTH < bufferSize && strncmp(buffer + ofs, "{ } { ", LEFT_CHILD_LENGTH) == 0)
             {
                 setRight(node, newNode());
                 node = node->right;
-                ofs += 6;
+                ofs += LEFT_CHILD_LENGTH;
                 continue;
             }
 
@@ -357,9 +361,9 @@ Node* readTreeFromFile(const char* filename)
                 setLeft(node, newNode());
                 node = node->left;
             }
-            else if (buffer[ofs + 2] == '}')
+            else if (buffer[ofs + 2] == '}') // in case '{ }'
             {
-                ofs += 3;
+                ofs += 3; // to skip '{ }'
                 continue;
             }
             else

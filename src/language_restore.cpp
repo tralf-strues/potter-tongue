@@ -29,5 +29,5 @@ void restoreFunction(Restorer* restorer, Node* node)
     assert(restorer != nullptr);
     assert(node     != nullptr);
 
-
+    
 }
