@@ -11,10 +11,10 @@ enum MathOp
 
     EQUAL_OP,
     NOT_EQUAL_OP,
-    LESS_OP,
-    GREATER_OP,
     LESS_EQUAL_OP,
-    GREATER_EQUAL_OP
+    GREATER_EQUAL_OP,
+    LESS_OP,
+    GREATER_OP
 };
 
 enum KeywordCode
@@ -22,6 +22,8 @@ enum KeywordCode
     PROG_START_KEYWORD,
     PROG_END_KEYWORD,
     NEW_LINE_KEYWORD,
+
+    COMMENT_KEYWORD,
 
     VDECL_KEYWORD,
     FDECL_KEYWORD,
@@ -52,6 +54,9 @@ enum KeywordCode
     SCAN_KEYWORD,
     PRINT_KEYWORD,
     FLOOR_KEYWORD,
+    SQRT_KEYWORD,
+
+    RAND_JUMP_KEYWORD,
 
     PLUS_KEYWORD,
     MINUS_KEYWORD,
@@ -60,10 +65,10 @@ enum KeywordCode
 
     EQUAL_KEYWORD,
     NOT_EQUAL_KEYWORD,
-    LESS_KEYWORD,
-    GREATER_KEYWORD,
     LESS_EQUAL_KEYWORD,
     GREATER_EQUAL_KEYWORD,
+    LESS_KEYWORD,
+    GREATER_KEYWORD,
 
     KEYWORDS_COUNT
 };
@@ -81,6 +86,8 @@ static const Keyword KEYWORDS[KEYWORDS_COUNT] = {
     { "Godric's-Hollow", 15, PROG_START_KEYWORD    },
     { "Privet-Drive",    12, PROG_END_KEYWORD      },
     { "\n",              1,  NEW_LINE_KEYWORD      },
+
+    { "(oNo)",           5,  COMMENT_KEYWORD       },
 
     { "avenseguim",      10, VDECL_KEYWORD         },
     { "imperio",         7,  FDECL_KEYWORD         },
@@ -111,6 +118,9 @@ static const Keyword KEYWORDS[KEYWORDS_COUNT] = {
     { "accio",           5,  SCAN_KEYWORD          },
     { "flagrate",        8,  PRINT_KEYWORD         },
     { "colloshoo",       9,  FLOOR_KEYWORD         },
+    { "crucio",          6,  SQRT_KEYWORD          },
+
+    { "riddikulus",      10, RAND_JUMP_KEYWORD     },
 
     { "epoximise",       9,  PLUS_KEYWORD          },
     { "flipendo",        8,  MINUS_KEYWORD         },
@@ -119,10 +129,11 @@ static const Keyword KEYWORDS[KEYWORDS_COUNT] = {
 
     { "equal",           5,  EQUAL_KEYWORD         },
     { "not-equal",       9,  NOT_EQUAL_KEYWORD     },
-    { "less",            4,  LESS_KEYWORD          },
-    { "greater",         7,  GREATER_KEYWORD       },
     { "less-equal",      10, LESS_EQUAL_KEYWORD    },
-    { "greater-equal",   13, GREATER_EQUAL_KEYWORD } 
+    { "greater-equal",   13, GREATER_EQUAL_KEYWORD }, 
+    { "less",            4,  LESS_KEYWORD          },
+    { "greater",         7,  GREATER_KEYWORD       }
 };
 
-const char* mathOpToString(MathOp operation);
+const char* mathOpToString   (MathOp operation);
+const char* getKeywordString (KeywordCode keywordCode);

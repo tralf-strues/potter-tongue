@@ -18,9 +18,10 @@ void   addToken        (Tokenizer* tokenizer, Token token);
 bool   processKeyword  (Tokenizer* tokenizer);
 bool   isKeywordNumber (Keyword keyword);
 double keywordToNumber (Keyword keyword);
+bool   processNumeric  (Tokenizer* tokenizer);
 bool   processId       (Tokenizer* tokenizer);
 
-void construct(Tokenizer* tokenizer, const char* buffer, size_t bufferSize)
+void construct(Tokenizer* tokenizer, const char* buffer, size_t bufferSize, bool useNumericNumbers)
 {
     assert(tokenizer != nullptr);
 
@@ -31,6 +32,8 @@ void construct(Tokenizer* tokenizer, const char* buffer, size_t bufferSize)
     tokenizer->tokens      = (Token*) calloc(MAX_TOKENS_COUNT, sizeof(Token));
     tokenizer->tokensCount = 0;
     tokenizer->currentLine = 0;
+
+    tokenizer->useNumericNumbers = useNumericNumbers;
 
     assert(tokenizer->tokens != nullptr);
 }
@@ -98,7 +101,7 @@ bool isComparand(Token* token)
 
     return isKeywordType(token) && 
            token->data.keywordCode >= EQUAL_KEYWORD && 
-           token->data.keywordCode <= GREATER_EQUAL_KEYWORD;
+           token->data.keywordCode <= GREATER_KEYWORD;
 }
 
 bool isTerm(Token* token)
@@ -127,7 +130,7 @@ void tokenizeBuffer(Tokenizer* tokenizer)
 
     while (!finished(tokenizer))
     {
-        if (!processKeyword(tokenizer) && !processId(tokenizer))
+        if (!processKeyword(tokenizer) && !processNumeric(tokenizer) && !processId(tokenizer))
         {
             break;
         }
@@ -182,6 +185,25 @@ bool processKeyword(Tokenizer* tokenizer)
             {
                 addToken(tokenizer, {NUMBER_TOKEN_TYPE, {.number = keywordToNumber(keyword)}, tokenizer->currentLine, tokenizer->position});
             }
+            else if (keyword.code == COMMENT_KEYWORD)
+            {
+                const char* newLine = strchr(tokenizer->position, '\n');
+
+                addToken(tokenizer, {KEYWORD_TOKEN_TYPE, {.keywordCode = NEW_LINE_KEYWORD}, tokenizer->currentLine, tokenizer->position});
+                    
+                if (newLine != nullptr)
+                {
+                    proceed(tokenizer, newLine - tokenizer->position + 1);
+                } 
+                else
+                {
+                    proceed(tokenizer, tokenizer->bufferSize);
+                }
+
+                tokenizer->currentLine++;
+
+                return true;
+            }
             else
             {
                 addToken(tokenizer, {KEYWORD_TOKEN_TYPE, {.keywordCode = keyword.code}, tokenizer->currentLine, tokenizer->position});
@@ -217,6 +239,23 @@ double keywordToNumber(Keyword keyword)
 
         default:            return -1;
     }
+}
+
+bool processNumeric(Tokenizer* tokenizer)
+{
+    ASSERT_TOKENIZER(tokenizer);
+
+    if (!(tokenizer->useNumericNumbers)) { return false; }
+
+    char*  numberEnd = nullptr;
+    double value     = strtod(tokenizer->position, &numberEnd);
+
+    if (numberEnd == tokenizer->position) { return false; }
+
+    addToken(tokenizer, {NUMBER_TOKEN_TYPE, {.number = value}, tokenizer->currentLine, tokenizer->position});
+    proceed(tokenizer, numberEnd - tokenizer->position);
+
+    return true;
 }
 
 bool processId(Tokenizer* tokenizer)

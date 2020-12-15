@@ -29,12 +29,14 @@ struct Tokenizer
     size_t      bufferSize;
     const char* position;
 
+    bool        useNumericNumbers;
+
     Token*      tokens;
     size_t      tokensCount;
     size_t      currentLine;
 };
 
-void construct      (Tokenizer* tokenizer, const char* buffer, size_t bufferSize);
+void construct      (Tokenizer* tokenizer, const char* buffer, size_t bufferSize, bool useNumericNumbers);
 void destroy        (Tokenizer* tokenizer);
 
 bool isNumberType   (Token* token);

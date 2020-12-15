@@ -11,7 +11,7 @@
 
 const size_t HORIZONTAL_LINE_LENGTH = 50;
 
-void compileError        (Compiler* compiler, CompilerError error);
+void compileError        (Compiler* compiler, CompilerError error); 
 
 void writeHorizontalLine (Compiler* compiler);
 void writeFunctionHeader (Compiler* compiler);
@@ -92,7 +92,6 @@ CompilerError compile(Compiler* compiler, const char* outputFile)
     CUR_FUNC = compiler->table->functions;
 
     fprintf(OUTPUT, "call :love\n"
-                    "out\n"
                     "hlt\n\n");
 
     Node* curDeclaration = compiler->tree;
@@ -141,11 +140,11 @@ void writeFunctionHeader(Compiler* compiler)
 
     fprintf(OUTPUT, "\n; vars: ");
 
-    for (size_t i = CUR_FUNC->argsCount; i < CUR_FUNC->varsCount - CUR_FUNC->argsCount; i++)
+    for (size_t i = CUR_FUNC->argsCount; i < CUR_FUNC->varsCount; i++)
     {
         fprintf(OUTPUT, "%s", CUR_FUNC->vars[i]);
 
-        if (i < CUR_FUNC->varsCount - CUR_FUNC->argsCount - 1)
+        if (i < CUR_FUNC->varsCount - 1)
         {
             fprintf(OUTPUT, ", ");
         }
@@ -171,7 +170,7 @@ void writeFunction(Compiler* compiler, Node* node)
 
     fprintf(OUTPUT, "\n");
     writeBlock(compiler, node->left);
-    fprintf(OUTPUT, "\n");
+    fprintf(OUTPUT, "ret\n\n");
 }
 
 void writeBlock(Compiler* compiler, Node* node)
@@ -195,11 +194,12 @@ void writeStatement(Compiler* compiler, Node* node)
 
     switch (node->left->type)
     {
-        case COND_TYPE: { writeCondition  (compiler, node->left); break; }
-        case LOOP_TYPE: { writeLoop       (compiler, node->left); break; }
-        case ASSG_TYPE: { writeAssignment (compiler, node->left); break; }
-        case JUMP_TYPE: { writeReturn     (compiler, node->left); break; }
-        default:        { writeExpression (compiler, node->left); break; }
+        case COND_TYPE:  { writeCondition  (compiler, node->left); break; }
+        case LOOP_TYPE:  { writeLoop       (compiler, node->left); break; }
+        case VDECL_TYPE: { writeAssignment (compiler, node->left); break; }
+        case ASSG_TYPE:  { writeAssignment (compiler, node->left); break; }
+        case JUMP_TYPE:  { writeReturn     (compiler, node->left); break; }
+        default:         { writeExpression (compiler, node->left); break; }
     }
 }
 
@@ -244,7 +244,7 @@ void writeLoop(Compiler* compiler, Node* node)
     writeExpression(compiler, node->left);
 
     fprintf(OUTPUT, "push 0\n"
-                    "je: WHILE_END_%u\n"
+                    "je :WHILE_END_%u\n"
                     "WHILE_BODY_%u:\n",
                     label,
                     label);
@@ -252,7 +252,7 @@ void writeLoop(Compiler* compiler, Node* node)
     writeBlock(compiler, node->right);
 
     fprintf(OUTPUT, "jmp :WHILE_%u\n"
-                    "WHILE_END_%u\n\n",
+                    "WHILE_END_%u:\n\n",
                     label,
                     label);
 }
@@ -424,7 +424,16 @@ bool writeStdCall(Compiler* compiler, Node* node)
     {
         writeExpression(compiler, node->right->left);
         fprintf(OUTPUT, "flr\n");
+    }
+    else if (strcmp(name, KEYWORDS[SQRT_KEYWORD].name) == 0)
+    {
+        writeExpression(compiler, node->right->left);
+        fprintf(OUTPUT, "sqrt\n");
     }  
+    else if (strcmp(name, KEYWORDS[RAND_JUMP_KEYWORD].name) == 0)
+    {
+        fprintf(OUTPUT, "rndjmp\n");
+    }
     else 
     {
         return false;

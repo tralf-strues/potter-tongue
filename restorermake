@@ -1,0 +1,37 @@
+Options = -std=c++2a -g -Wpedantic -Wall 
+
+SrcDir = src
+BinDir = bin
+IntDir = $(BinDir)/intermediates
+LibDir = libs
+
+LIBS = $(wildcard $(LibDir)/*.a)
+DEPS = $(wildcard $(SrcDir)/*.h) $(wildcard $(LibDir)/*.h)
+OBJS = $(IntDir)/main_lang_restorer.o $(IntDir)/syntax.o $(IntDir)/tokenizer.o $(IntDir)/expression_tree.o $(IntDir)/parser.o $(IntDir)/symbol_table.o $(IntDir)/compiler.o $(IntDir)/language_restore.o 
+
+$(BinDir)/restorer.exe: $(OBJS) $(LIBS) $(DEPS)
+	g++ -o $(BinDir)/restorer.exe $(OBJS) $(LIBS)
+
+$(IntDir)/main_lang_restorer.o: $(SrcDir)/main_lang_restorer.cpp $(DEPS)
+	g++ -o $(IntDir)/main_lang_restorer.o -c $(SrcDir)/main_lang_restorer.cpp $(Options)
+
+$(IntDir)/syntax.o: $(SrcDir)/syntax.cpp $(DEPS)
+	g++ -o $(IntDir)/syntax.o -c $(SrcDir)/syntax.cpp $(Options)
+
+$(IntDir)/tokenizer.o: $(SrcDir)/tokenizer.cpp $(DEPS)
+	g++ -o $(IntDir)/tokenizer.o -c $(SrcDir)/tokenizer.cpp $(Options)
+
+$(IntDir)/expression_tree.o: $(SrcDir)/expression_tree.cpp $(DEPS)
+	g++ -o $(IntDir)/expression_tree.o -c $(SrcDir)/expression_tree.cpp $(Options)
+
+$(IntDir)/parser.o: $(SrcDir)/parser.cpp $(DEPS)
+	g++ -o $(IntDir)/parser.o -c $(SrcDir)/parser.cpp $(Options)
+
+$(IntDir)/symbol_table.o: $(SrcDir)/symbol_table.cpp $(DEPS)
+	g++ -o $(IntDir)/symbol_table.o -c $(SrcDir)/symbol_table.cpp $(Options)
+
+$(IntDir)/compiler.o: $(SrcDir)/compiler.cpp $(DEPS)
+	g++ -o $(IntDir)/compiler.o -c $(SrcDir)/compiler.cpp $(Options)
+
+$(IntDir)/language_restore.o: $(SrcDir)/language_restore.cpp $(DEPS)
+	g++ -o $(IntDir)/language_restore.o -c $(SrcDir)/language_restore.cpp $(Options)

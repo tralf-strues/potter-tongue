@@ -5,13 +5,6 @@
 #include "parser.h"
 #include "../libs/utilib.h"
 
-/*====================================================================
- TODO
-- Use program's name
-+ Make an array of error strings
-
-======================================================================*/
-
 #define ASSERT_PARSER(parser) assert(parser                      != nullptr); \
                               assert(parser->tokenizer           != nullptr); \
                               assert(parser->tokenizer           != nullptr); \
@@ -59,7 +52,7 @@ Node*  parseVDeclaration   (Parser* parser);
 Node*  parseAssignment     (Parser* parser);
 Node*  parseCall           (Parser* parser);
 Node*  parsePrint          (Parser* parser);
-Node*  parseFloor          (Parser* parser);
+Node*  parseStandardFunc   (Parser* parser, KeywordCode keywordCode);
 Node*  parseExprList       (Parser* parser);
 Node*  parseArgList        (Parser* parser);
 Node*  parseJump           (Parser* parser);
@@ -112,7 +105,6 @@ void proceed(Parser* parser, int step)
 
     parser->offset += step;
 
-    // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo
     if (parser->offset > parser->tokenizer->tokensCount)
     {
         parser->offset = parser->tokenizer->tokensCount;
@@ -275,7 +267,6 @@ Node* parseProgramBody(Parser* parser)
         setLeft(prevDeclaration, nextDeclaration);
         
         prevDeclaration = nextDeclaration;
-        nextDeclaration = parseDeclaration(parser);
     }
 
     return root;
@@ -512,12 +503,20 @@ Node* parseFactor(Parser* parser)
                 break;
             }
 
-            case CALL_KEYWORD:  { factor = parseCall(parser);  break; }
-            case FLOOR_KEYWORD: { factor = parseFloor(parser); break; }
+            case CALL_KEYWORD:  { factor = parseCall         (parser);                break; }
+            case FLOOR_KEYWORD: { factor = parseStandardFunc (parser, FLOOR_KEYWORD); break; }
+            case SQRT_KEYWORD:  { factor = parseStandardFunc (parser, SQRT_KEYWORD);  break; }
 
             case SCAN_KEYWORD:
             {
                 factor = newNode(CALL_TYPE, {}, NAME(KEYWORDS[SCAN_KEYWORD].name), nullptr);
+                proceed(parser);
+                break;
+            }
+
+            case RAND_JUMP_KEYWORD:
+            {
+                factor = newNode(CALL_TYPE, {}, NAME(KEYWORDS[RAND_JUMP_KEYWORD].name), nullptr);
                 proceed(parser);
                 break;
             }
@@ -613,6 +612,25 @@ Node* parsePrint(Parser* parser)
     return newNode(CALL_TYPE, {}, NAME(KEYWORDS[PRINT_KEYWORD].name), exprList);
 }
 
+Node* parseStandardFunc(Parser* parser, KeywordCode keywordCode)
+{
+    ASSERT_PARSER(parser);
+    
+    if (!isKeyword(curToken(parser), keywordCode)) { return nullptr; }
+    proceed(parser);
+
+    REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
+    
+    Node* expression = parseExpression(parser);
+    if (expression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FLOOR_EXPRESSION_NEEDED); }
+
+    REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
+
+    Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
+
+    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[keywordCode].name), exprList);
+}
+
 Node* parseFloor(Parser* parser)
 {
     ASSERT_PARSER(parser);
@@ -630,6 +648,25 @@ Node* parseFloor(Parser* parser)
     Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
 
     return newNode(CALL_TYPE, {}, NAME(KEYWORDS[FLOOR_KEYWORD].name), exprList);
+}
+
+Node* parseSqrt(Parser* parser)
+{
+    ASSERT_PARSER(parser);
+    
+    if (!isKeyword(curToken(parser), SQRT_KEYWORD)) { return nullptr; }
+    proceed(parser);
+
+    REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
+    
+    Node* expression = parseExpression(parser);
+    if (expression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FLOOR_EXPRESSION_NEEDED); }
+
+    REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
+
+    Node* exprList = newNode(LIST_TYPE, {}, expression, nullptr);
+
+    return newNode(CALL_TYPE, {}, NAME(KEYWORDS[SQRT_KEYWORD].name), exprList);
 }
 
 Node* parseExprList(Parser* parser)

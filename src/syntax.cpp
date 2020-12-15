@@ -21,3 +21,8 @@ const char* mathOpToString(MathOp operation)
 
     return "invalid operation";
 }
+
+const char* getKeywordString(KeywordCode keywordCode)
+{
+    return KEYWORDS[keywordCode].name;
+}

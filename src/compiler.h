@@ -16,7 +16,6 @@ enum CompilerError
 
 static const char* COMPILER_ERROR_STRINGS[COMPILER_ERRORS_COUNT] = {
     "no error",
-
     "couldn't open file to write output to",
     "main function ('love') wasn't found",
     "calling undefined function"

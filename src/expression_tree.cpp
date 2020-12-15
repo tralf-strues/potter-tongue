@@ -28,6 +28,7 @@ const char*  UNIVERSAL_MAIN_NAME  = "main";
 const char*  UNIVERSAL_PRINT_NAME = "print";
 const char*  UNIVERSAL_SCAN_NAME  = "scan";
 const char*  UNIVERSAL_FLOOR_NAME = "floor";
+const char*  UNIVERSAL_SQRT_NAME  = "sqrt";
 
 const size_t FIRST_DECL_LENGTH    = strlen("0 | 0");
 const size_t LEAF_CHILDREN_LENGTH = strlen("{ } { }");
@@ -303,6 +304,10 @@ void dumpToFile(FILE* file, Node* node)
         {
             fprintf(file, "%s ", UNIVERSAL_FLOOR_NAME);   
         }
+        else if (strcmp(node->data.id, KEYWORDS[SQRT_KEYWORD].name) == 0)
+        {
+            fprintf(file, "%s ", UNIVERSAL_SQRT_NAME);   
+        }
         else
         {
             fprintf(file, "%s ", node->data.id);
@@ -410,6 +415,10 @@ Node* readTreeFromFile(const char* filename)
             else if (strncmp(buffer + ofs, UNIVERSAL_FLOOR_NAME, len) == 0)
             {
                 node->data.id = KEYWORDS[FLOOR_KEYWORD].name;
+            }
+            else if (strncmp(buffer + ofs, UNIVERSAL_SQRT_NAME, len) == 0)
+            {
+                node->data.id = KEYWORDS[SQRT_KEYWORD].name;
             }
             else
             {
