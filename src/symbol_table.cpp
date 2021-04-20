@@ -4,8 +4,7 @@
 #include <string.h>
 #include "symbol_table.h"
 
-const double REALLOC_MULTIPLIER  = 1.8;
-
+const double REALLOC_MULTIPLIER     = 1.8;
 const size_t DEFAULT_FUNCS_CAPACITY = 8;
 const size_t DEFAULT_VARS_CAPACITY  = 16;
 
@@ -75,10 +74,10 @@ Function* getFunction(SymbolTable* table, const char* function)
     return nullptr;
 }
 
-void pushArgument(Function* function, const char* argument)
+void pushParameter(Function* function, const char* parameter)
 {
-    pushVariable(function, argument);
-    function->argsCount++;
+    pushVariable(function, parameter);
+    function->paramsCount++;
 }
 
 void pushVariable(Function* function, const char* variable)
@@ -154,12 +153,12 @@ void dump(SymbolTable* table)
         for (size_t i = 0; i < table->functionsCount; i++)
         {
             Function* function = &(table->functions[i]);
-            printf("{ name='%s', varsCapacity=%zu, varsCount=%zu, argsCount=%zu, \n                  "
+            printf("{ name='%s', varsCapacity=%zu, varsCount=%zu, paramsCount=%zu, \n                  "
                    "  vars=[",
                    function->name, 
                    function->varsCapacity,
                    function->varsCount,
-                   function->argsCount);
+                   function->paramsCount);
 
             for (size_t j = 0; j < function->varsCount; j++)
             {

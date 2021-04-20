@@ -126,13 +126,13 @@ void writeFunctionHeader(Compiler* compiler)
     ASSERT_COMPILER(compiler);
 
     writeHorizontalLine(compiler);
-    fprintf(OUTPUT, "; %s\n;\n; args: ", CUR_FUNC->name);
+    fprintf(OUTPUT, "; %s\n;\n; params: ", CUR_FUNC->name);
 
-    for (size_t i = 0; i < CUR_FUNC->argsCount; i++)
+    for (size_t i = 0; i < CUR_FUNC->paramsCount; i++)
     {
         fprintf(OUTPUT, "%s", CUR_FUNC->vars[i]);
 
-        if (i < CUR_FUNC->argsCount - 1)
+        if (i < CUR_FUNC->paramsCount - 1)
         {
             fprintf(OUTPUT, ", ");
         }
@@ -140,7 +140,7 @@ void writeFunctionHeader(Compiler* compiler)
 
     fprintf(OUTPUT, "\n; vars: ");
 
-    for (size_t i = CUR_FUNC->argsCount; i < CUR_FUNC->varsCount; i++)
+    for (size_t i = CUR_FUNC->paramsCount; i < CUR_FUNC->varsCount; i++)
     {
         fprintf(OUTPUT, "%s", CUR_FUNC->vars[i]);
 
@@ -163,7 +163,7 @@ void writeFunction(Compiler* compiler, Node* node)
 
     writeFunctionHeader(compiler);
 
-    for (size_t i = 0; i < CUR_FUNC->argsCount; i++)
+    for (size_t i = 0; i < CUR_FUNC->paramsCount; i++)
     {
         fprintf(OUTPUT, "pop [rax+%zu]\n", 2 + i);
     }

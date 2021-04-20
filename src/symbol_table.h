@@ -8,8 +8,8 @@ struct Function
 
     char**      vars;
     size_t      varsCapacity;
-    size_t      varsCount;
-    size_t      argsCount;
+    size_t      varsCount;   // local variables count (including parameters!)
+    size_t      paramsCount; // parameters count
 };
 
 struct SymbolTable
@@ -19,14 +19,13 @@ struct SymbolTable
     size_t    functionsCount;
 };
 
-void      construct    (SymbolTable* table);
-void      destroy      (SymbolTable* table);
+void      construct     (SymbolTable* table);
+void      destroy       (SymbolTable* table);
+void      dump          (SymbolTable* table);
 
-Function* pushFunction (SymbolTable* table, const char* function);
-Function* getFunction  (SymbolTable* table, const char* function);
+Function* pushFunction  (SymbolTable* table, const char* function);
+Function* getFunction   (SymbolTable* table, const char* function);
 
-void      pushArgument (Function* function, const char* argument);
-void      pushVariable (Function* function, const char* variable);
-int       getVarOffset (Function* function, const char* variable);
-
-void      dump         (SymbolTable* table);
+void      pushParameter (Function* function, const char* parameter);
+void      pushVariable  (Function* function, const char* variable);
+int       getVarOffset  (Function* function, const char* variable);

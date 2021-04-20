@@ -14,12 +14,12 @@ enum ParseError
 
     PARSE_ERROR_FUNCTION_DECLARATION_NEEDED,
     PARSE_ERROR_FUNCTION_SECOND_DECLARATION,
-    PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED,
+    PARSE_ERROR_FUNCTION_PARAMS_NEEDED,
     PARSE_ERROR_FUNCTION_BODY_NEEDED,
     PARSE_ERROR_RETURN_EXPRESSION_NEEDED,
 
-    PARSE_ERROR_FUNCTION_CALL_ARGS_NEEDED,
-    PARSE_ERROR_FUNCTION_CALL_EXTRA_ARGS,
+    PARSE_ERROR_FUNCTION_CALL_PARAMS_NEEDED,
+    PARSE_ERROR_FUNCTION_CALL_EXTRA_PARAMS,
 
     PARSE_ERROR_PRINT_EXPRESSION_NEEDED,
     PARSE_ERROR_FLOOR_EXPRESSION_NEEDED,
@@ -66,12 +66,12 @@ static const char* PARSE_ERROR_STRINGS[PARSE_ERRORS_COUNT] = {
 
     "no function declaration found ('imperio')",
     "second declaration of the function",
-    "couldn't find function's arguments",
+    "couldn't find function's parameters",
     "couldn't find function's body",
     "couldn't find an expression after 'reverte' operator",
 
-    "function call: not enough arguments passed",
-    "function call: too many arguments passed",
+    "function call: not enough parameters passed",
+    "function call: too many parameters passed",
 
     "couldn't find an expression after 'flagrate' operator",
     "couldn't find an expression after 'colloshoo' operator",

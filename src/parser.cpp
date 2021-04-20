@@ -54,7 +54,7 @@ Node*  parseCall           (Parser* parser);
 Node*  parsePrint          (Parser* parser);
 Node*  parseStandardFunc   (Parser* parser, KeywordCode keywordCode);
 Node*  parseExprList       (Parser* parser);
-Node*  parseArgList        (Parser* parser);
+Node*  parseParamList      (Parser* parser);
 Node*  parseJump           (Parser* parser);
 Node*  parseCondition      (Parser* parser);
 Node*  parseLoop           (Parser* parser);
@@ -291,11 +291,11 @@ Node* parseDeclaration(Parser* parser)
 
     parser->curFunction = pushFunction(parser->table, declaration->right->data.id);
 
-    Node* args = parseArgList(parser);
+    Node* params = parseParamList(parser);
 
-    if (args == nullptr && !isNumber(curToken(parser), 0))
+    if (params == nullptr && !isNumber(curToken(parser), 0))
     {
-        SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED);
+        SYNTAX_ERROR(PARSE_ERROR_FUNCTION_PARAMS_NEEDED);
     }
 
     if (isNumber(curToken(parser), 0))
@@ -303,7 +303,7 @@ Node* parseDeclaration(Parser* parser)
         proceed(parser);
     }
 
-    setRight(declaration->right, args);
+    setRight(declaration->right, params);
     setLeft(declaration->right, parseBlock(parser));
 
     if (declaration->right->left == nullptr)
@@ -589,7 +589,7 @@ Node* parseCall(Parser* parser)
     {
         exprList = parseExprList(parser);
 
-        if (exprList == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED); }
+        if (exprList == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_PARAMS_NEEDED); }
     }
 
     REQUIRE_KEYWORD(BRACKET_KEYWORD, PARSE_ERROR_BRACKET_NEEDED);
@@ -683,7 +683,7 @@ Node* parseExprList(Parser* parser)
         proceed(parser);
 
         Node* nextExpression = parseExpression(parser);
-        if (nextExpression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED); }
+        if (nextExpression == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_PARAMS_NEEDED); }
 
         exprList = newNode(LIST_TYPE, {}, nextExpression, exprList);
     }
@@ -691,28 +691,28 @@ Node* parseExprList(Parser* parser)
     return exprList;
 }
 
-Node* parseArgList(Parser* parser)
+Node* parseParamList(Parser* parser)
 {
     ASSERT_PARSER(parser);
         
-    Node* arg = parseId(parser);
-    if (arg == nullptr) { return nullptr; }
+    Node* param = parseId(parser);
+    if (param == nullptr) { return nullptr; }
 
-    Node* prevArg = arg;
-    pushArgument(parser->curFunction, prevArg->data.id);
+    Node* prevParam = param;
+    pushParameter(parser->curFunction, prevParam->data.id);
 
     while (isKeyword(curToken(parser), COMMA_KEYWORD))
     {
         proceed(parser);
 
-        setRight(prevArg, parseId(parser));
-        if (prevArg->right == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_ARGUMENTS_NEEDED); }
+        setRight(prevParam, parseId(parser));
+        if (prevParam->right == nullptr) { SYNTAX_ERROR(PARSE_ERROR_FUNCTION_PARAMS_NEEDED); }
 
-        prevArg = prevArg->right;
-        pushArgument(parser->curFunction, prevArg->data.id);
+        prevParam = prevParam->right;
+        pushParameter(parser->curFunction, prevParam->data.id);
     }
 
-    return arg;
+    return param;
 }
 
 Node* parseJump(Parser* parser)

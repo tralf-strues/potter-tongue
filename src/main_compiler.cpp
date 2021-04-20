@@ -96,7 +96,7 @@ const char* FLAGS_HELP_MESSAGES[TOTAL_FLAGS] = {
     "\t\tfunctionsCapacity = <capacity of the dynamic array of functions>\n"
     "\t\tfunctionsCount    = <total number of functions>\n\n"
     "\t\tfunctions = { \n"
-    "\t\t\t{ name='<>', varsCapacity=<>, varsCount=<>, argsCount=<>, \n"
+    "\t\t\t{ name='<>', varsCapacity=<>, varsCount=<>, paramsCount=<>, \n"
     "\t\t\t  vars=['<>', '<>', '<>']\n"
     "\t\t\t}\n"
     "\t\t}\n",
