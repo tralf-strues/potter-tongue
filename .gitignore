@@ -1,0 +1,10 @@
+*.o
+*.out
+*.rar
+*.zip
+*.json
+.vscode
+vgcore.*
+
+bin/log/
+dumped_tree.txt

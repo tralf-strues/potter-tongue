@@ -47,25 +47,26 @@ struct Node
 #define BINARY_OP(op, root1, root2) newNode(MATH_TYPE, { .operation = op##_OP }, root1,   root2)
 #define NAME(name)                  newNode(NAME_TYPE, { .id        = name    }, nullptr, nullptr)
 
-void   destroySubtree   (Node* root);
+void   destroySubtree    (Node* root);
 
-Node*  newNode          ();
-Node*  newNode          (NodeType type, NodeData data, Node* left, Node* right);
-void   deleteNode       (Node* node);
+Node*  newNode           ();
+Node*  newNode           (NodeType type, NodeData data, Node* left, Node* right);
+void   deleteNode        (Node* node);
 
-void   setLeft          (Node* root, Node* left);
-void   setRight         (Node* root, Node* right);
+void   setLeft           (Node* root, Node* left);
+void   setRight          (Node* root, Node* right);
 
-void   copyNode         (Node* dest, const Node* src);
-Node*  copyTree         (const Node* root);
+void   copyNode          (Node* dest, const Node* src);
+Node*  copyTree          (const Node* root);
 
-bool   isLeft           (const Node* node);
+bool   isLeft            (const Node* node);
 
-void   setData          (Node* node, NodeType type, NodeData data);
-void   setData          (Node* node, double number);
-void   setData          (Node* node, MathOp op);
-void   setData          (Node* node, const char* id);
+void   setData           (Node* node, NodeType type, NodeData data);
+void   setData           (Node* node, double number);
+void   setData           (Node* node, MathOp op);
+void   setData           (Node* node, const char* id);
 
-void   graphDump        (Node* root);
-void   dumpToFile       (FILE* file, Node* root);
-Node*  readTreeFromFile (const char* filename);
+int    counterFileUpdate (const char* filename);
+void   graphDump         (Node* root, const char* treeFilename, const char* outputFilename);
+void   dumpToFile        (FILE* file, Node* root);
+Node*  readTreeFromFile  (const char* filename);

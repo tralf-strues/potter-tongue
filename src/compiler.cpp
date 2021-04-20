@@ -165,7 +165,7 @@ void writeFunction(Compiler* compiler, Node* node)
 
     for (size_t i = 0; i < CUR_FUNC->argsCount; i++)
     {
-        fprintf(OUTPUT, "pop [rax+%u]\n", 2 + i);
+        fprintf(OUTPUT, "pop [rax+%zu]\n", 2 + i);
     }
 
     fprintf(OUTPUT, "\n");
@@ -215,13 +215,13 @@ void writeCondition(Compiler* compiler, Node* node)
     size_t label = compiler->curCondLabel++;
 
     fprintf(OUTPUT, "push 0\n"
-                    "je :IF_END_%u\n\n",
+                    "je :IF_END_%zu\n\n",
                     label);
 
     writeBlock(compiler, node->right->left);    
 
-    fprintf(OUTPUT, "jmp :IF_ELSE_END_%u\n"
-                    "IF_END_%u:\n", 
+    fprintf(OUTPUT, "jmp :IF_ELSE_END_%zu\n"
+                    "IF_END_%zu:\n", 
                     label,
                     label);
 
@@ -230,7 +230,7 @@ void writeCondition(Compiler* compiler, Node* node)
         writeBlock(compiler, node->right->right);
     }
 
-    fprintf(OUTPUT, "IF_ELSE_END_%u:\n\n", label);
+    fprintf(OUTPUT, "IF_ELSE_END_%zu:\n\n", label);
 }
 
 void writeLoop(Compiler* compiler, Node* node)
@@ -240,19 +240,19 @@ void writeLoop(Compiler* compiler, Node* node)
 
     size_t label = compiler->curLoopLabel++;
 
-    fprintf(OUTPUT, "\nWHILE_%u:\n", label);
+    fprintf(OUTPUT, "\nWHILE_%zu:\n", label);
     writeExpression(compiler, node->left);
 
     fprintf(OUTPUT, "push 0\n"
-                    "je :WHILE_END_%u\n"
-                    "WHILE_BODY_%u:\n",
+                    "je :WHILE_END_%zu\n"
+                    "WHILE_BODY_%zu:\n",
                     label,
                     label);
 
     writeBlock(compiler, node->right);
 
-    fprintf(OUTPUT, "jmp :WHILE_%u\n"
-                    "WHILE_END_%u:\n\n",
+    fprintf(OUTPUT, "jmp :WHILE_%zu\n"
+                    "WHILE_END_%zu:\n\n",
                     label,
                     label);
 }
@@ -264,7 +264,7 @@ void writeAssignment(Compiler* compiler, Node* node)
 
     writeExpression(compiler, node->right);
 
-    fprintf(OUTPUT, "pop [rax+%u]\n\n", 2 + getVarOffset(CUR_FUNC, node->left->data.id));
+    fprintf(OUTPUT, "pop [rax+%d]\n\n", 2 + getVarOffset(CUR_FUNC, node->left->data.id));
 }
 
 void writeReturn(Compiler* compiler, Node* node)
@@ -292,6 +292,7 @@ void writeExpression(Compiler* compiler, Node* node)
         case NUMB_TYPE: { writeNumber (compiler, node); break; }
         case NAME_TYPE: { writeVar    (compiler, node); break; }
         case CALL_TYPE: { writeCall   (compiler, node); break; }
+        default:        { assert(!"Invalid node type"); break; }
     }
 }
 
@@ -317,6 +318,7 @@ void writeMath(Compiler* compiler, Node* node)
         case SUB_OP: { fprintf(OUTPUT, "sub\n\n"); break; }
         case MUL_OP: { fprintf(OUTPUT, "mul\n\n"); break; }
         case DIV_OP: { fprintf(OUTPUT, "div\n\n"); break; }
+        default:     { assert(!"Invalid math op"); break; }
     }
 }
 
@@ -325,7 +327,6 @@ void writeCompare(Compiler* compiler, Node* node)
     ASSERT_COMPILER(compiler);
     assert(node != nullptr);
 
-    MathOp operation = node->data.operation;
     size_t label = compiler->curCmpLabel++;
 
     writeExpression(compiler, node->left);
@@ -333,20 +334,21 @@ void writeCompare(Compiler* compiler, Node* node)
 
     switch (node->data.operation)
     {
-        case EQUAL_OP:         { fprintf(OUTPUT, "je");  break; }
-        case NOT_EQUAL_OP:     { fprintf(OUTPUT, "jne"); break; }
-        case LESS_OP:          { fprintf(OUTPUT, "jb");  break; }
-        case GREATER_OP:       { fprintf(OUTPUT, "ja");  break; }
-        case LESS_EQUAL_OP:    { fprintf(OUTPUT, "jbe"); break; }
-        case GREATER_EQUAL_OP: { fprintf(OUTPUT, "jae"); break; }
+        case EQUAL_OP:         { fprintf(OUTPUT, "je");     break; }
+        case NOT_EQUAL_OP:     { fprintf(OUTPUT, "jne");    break; }
+        case LESS_OP:          { fprintf(OUTPUT, "jb");     break; }
+        case GREATER_OP:       { fprintf(OUTPUT, "ja");     break; }
+        case LESS_EQUAL_OP:    { fprintf(OUTPUT, "jbe");    break; }
+        case GREATER_EQUAL_OP: { fprintf(OUTPUT, "jae");    break; }
+        default:               { assert(!"Invalid cmp op"); break;}
     }
 
-    fprintf(OUTPUT, " :COMPARISON_%u\n"
+    fprintf(OUTPUT, " :COMPARISON_%zu\n"
                     "push 0\n"
-                    "jmp :COMPARISON_END_%u\n"
-                    "COMPARISON_%u:\n"
+                    "jmp :COMPARISON_END_%zu\n"
+                    "COMPARISON_%zu:\n"
                     "push 1\n"
-                    "COMPARISON_END_%u:\n\n", 
+                    "COMPARISON_END_%zu:\n\n", 
                     label,
                     label,
                     label,
@@ -366,7 +368,7 @@ void writeVar(Compiler* compiler, Node* node)
     ASSERT_COMPILER(compiler);
     assert(node != nullptr);
 
-    fprintf(OUTPUT, "push [rax+%u]\n", 2 + getVarOffset(CUR_FUNC, node->data.id));
+    fprintf(OUTPUT, "push [rax+%d]\n", 2 + getVarOffset(CUR_FUNC, node->data.id));
 }
 
 void writeCall(Compiler* compiler, Node* node)
@@ -397,7 +399,7 @@ void writeCall(Compiler* compiler, Node* node)
                     "add\n"
                     "pop rax\n"
                     "pop [rax]\n"
-                    "push %u\n"
+                    "push %zu\n"
                     "pop [rax+1]\n"
                     "call :%s\n\n",
                     function->name,

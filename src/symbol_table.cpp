@@ -7,7 +7,7 @@
 const double REALLOC_MULTIPLIER  = 1.8;
 
 const size_t DEFAULT_FUNCS_CAPACITY = 8;
-const size_t DEFAULT_VARBS_CAPACITY = 16;
+const size_t DEFAULT_VARS_CAPACITY  = 16;
 
 void reallocFunctions(SymbolTable* table);
 void reallocVariables(Function* function);
@@ -50,8 +50,8 @@ Function* pushFunction(SymbolTable* table, const char* function)
     }
 
     table->functions[table->functionsCount].name         = function;
-    table->functions[table->functionsCount].vars         = (char**) calloc(DEFAULT_VARBS_CAPACITY, sizeof(char*));
-    table->functions[table->functionsCount].varsCapacity = DEFAULT_VARBS_CAPACITY;
+    table->functions[table->functionsCount].vars         = (char**) calloc(DEFAULT_VARS_CAPACITY, sizeof(char*));
+    table->functions[table->functionsCount].varsCapacity = DEFAULT_VARS_CAPACITY;
 
     table->functionsCount++;
 
@@ -139,8 +139,8 @@ void dump(SymbolTable* table)
     assert(table != nullptr);
 
     printf("Symbol table:\n"
-           "    functionsCapacity = %u\n"
-           "    functionsCount    = %u\n\n"
+           "    functionsCapacity = %zu\n"
+           "    functionsCount    = %zu\n\n"
            "    functions = { ", 
            table->functionsCapacity, 
            table->functionsCount);
@@ -154,7 +154,7 @@ void dump(SymbolTable* table)
         for (size_t i = 0; i < table->functionsCount; i++)
         {
             Function* function = &(table->functions[i]);
-            printf("{ name='%s', varsCapacity=%u, varsCount=%u, argsCount=%u, \n                  "
+            printf("{ name='%s', varsCapacity=%zu, varsCount=%zu, argsCount=%zu, \n                  "
                    "  vars=[",
                    function->name, 
                    function->varsCapacity,

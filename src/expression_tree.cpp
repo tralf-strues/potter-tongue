@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <direct.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,7 +6,6 @@
 #include "../libs/utilib.h"
 #include "../libs/file_manager.h"
 
-const size_t MAX_FILENAME_LENGTH  = 128;
 const size_t MAX_COMMAND_LENGTH   = 256;
 
 const char*  DECL_GRAPH_STYLE     = ", color=\"#000000\", fillcolor=\"#FFFFFF\", fontcolor=\"#000000\"";
@@ -175,7 +173,7 @@ int counterFileUpdate(const char* filename)
     }
     else
     {
-        fscanf(counterFile, "%u", &count);
+        fscanf(counterFile, "%d", &count);
         fseek(counterFile, 0, SEEK_SET);
     }
 
@@ -185,24 +183,21 @@ int counterFileUpdate(const char* filename)
     return count;
 }
 
-void graphDump(Node* root)
+void graphDump(Node* root, const char* treeFilename, const char* outputFilename)
 {
-    assert(root != nullptr);
+    assert(root           != nullptr);
+    assert(treeFilename   != nullptr);
+    assert(outputFilename != nullptr);
 
-    int count = counterFileUpdate("log/tree_dumps/graph/count.cnt");
-
-    char textFilename[MAX_FILENAME_LENGTH] = {};
-    snprintf(textFilename, sizeof(textFilename), "%s%u.txt", "log/tree_dumps/graph/text/tree", count);
-
-    char imageFilename[MAX_FILENAME_LENGTH] = {};
-    snprintf(imageFilename, sizeof(imageFilename), "%s%u.svg", "log/tree_dumps/graph/img/tree", count);
-
-    FILE* file = fopen(textFilename, "w");
+    FILE* file = fopen(treeFilename, "w");
     assert(file != nullptr);
 
-    fprintf(file,
-            "digraph structs {\n"
-            "\tnode [shape=\"circle\", style=\"filled\", color=\"#52527A\", fontcolor=\"#52527A\", fillcolor=\"#E1E1EA\"];\n\n");
+    fprintf(file, "digraph structs {\n"
+                  "\tnode [shape=\"circle\", "
+                  "style=\"filled\", "
+                  "color=\"#52527A\", "
+                  "fontcolor=\"#52527A\", "
+                  "fillcolor=\"#E1E1EA\"];\n\n");
 
     if (root == nullptr) { fprintf(file, "\t\"ROOT\" [label = \"Empty database\"];\n"); }
     else                 { graphDumpSubtree(file, root); }
@@ -213,10 +208,7 @@ void graphDump(Node* root)
 
     char dotCmd[MAX_COMMAND_LENGTH] = {};
 
-    snprintf(dotCmd, sizeof(dotCmd), "dot -Tsvg %s -o %s", textFilename, imageFilename);
-    system(dotCmd);
-
-    snprintf(dotCmd, sizeof(dotCmd), "start %s", imageFilename);
+    snprintf(dotCmd, sizeof(dotCmd), "dot -Tsvg %s -o %s", treeFilename, outputFilename);
     system(dotCmd);
 }
 
@@ -226,11 +218,9 @@ void graphDumpSubtree(FILE* file, Node* node)
     
     if (node == nullptr) { return; }
 
-    fprintf(file, "\t\"%p\" [label=", node);
+    fprintf(file, "\t\"%p\" [label=", (void*) node);
 
-    NodeType    type      = node->type; 
-    const char* constName = nullptr;
-    switch (type)
+    switch (node->type)
     {
         case DECL_TYPE:  { fprintf(file, "\"D\"%s];\n",                 DECL_GRAPH_STYLE); break; }
         case VDECL_TYPE: { fprintf(file, "\"=\"%s];\n",                 ASSG_GRAPH_STYLE); break; }
@@ -263,11 +253,11 @@ void graphDumpSubtree(FILE* file, Node* node)
     {
         if (isLeft(node))
         {
-            fprintf(file, "\t\"%p\":sw->\"%p\";\n", node->parent, node);
+            fprintf(file, "\t\"%p\":sw->\"%p\";\n", (void*) node->parent, (void*) node);
         }
         else
         {
-            fprintf(file, "\t\"%p\":se->\"%p\";\n", node->parent, node);
+            fprintf(file, "\t\"%p\":se->\"%p\";\n", (void*) node->parent, (void*) node);
         }
     }   
 
@@ -389,7 +379,7 @@ Node* readTreeFromFile(const char* filename)
         }
 
         int len = 0;
-        sscanf(buffer + ofs, "%d | %n", &node->type, &len);
+        sscanf(buffer + ofs, "%d | %n", (int*) &node->type, &len);
         ofs += len;
 
         if (node->type == NUMB_TYPE)
@@ -427,7 +417,7 @@ Node* readTreeFromFile(const char* filename)
         }
         else
         {
-            sscanf(buffer + ofs, "%d %n", &(node->data.operation), &len);
+            sscanf(buffer + ofs, "%d %n", (int*) &(node->data.operation), &len);
         }
 
         ofs += len;

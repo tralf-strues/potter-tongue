@@ -66,8 +66,8 @@ LIBS = $(wildcard $(LibDir)/*.a)
 DEPS = $(wildcard $(SrcDir)/*.h) $(wildcard $(LibDir)/*.h)
 OBJS = $(IntDir)/main_compiler.o $(IntDir)/syntax.o $(IntDir)/tokenizer.o $(IntDir)/expression_tree.o $(IntDir)/parser.o $(IntDir)/symbol_table.o $(IntDir)/compiler.o 
 
-$(BinDir)/compiler.exe: $(OBJS) $(LIBS) $(DEPS)
-	g++ -o $(BinDir)/compiler.exe $(OBJS) $(LIBS)
+$(BinDir)/compiler.out: $(OBJS) $(LIBS) $(DEPS)
+	g++ -o $(BinDir)/compiler.out $(OBJS) $(LIBS)
 
 $(IntDir)/main_compiler.o: $(SrcDir)/main_compiler.cpp $(DEPS)
 	g++ -o $(IntDir)/main_compiler.o -c $(SrcDir)/main_compiler.cpp $(Options)

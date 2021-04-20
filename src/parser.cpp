@@ -101,7 +101,7 @@ void proceed(Parser* parser, int step)
 {
     ASSERT_PARSER(parser);
 
-    assert(step >= 0 || (step < 0 && parser->offset >= -step));
+    assert(step >= 0 || (step < 0 && ((int) parser->offset) >= -step));
 
     parser->offset += step;
 
@@ -221,9 +221,9 @@ void syntaxError(Parser* parser, ParseError error)
     }
 
     int lineOffset = digitsCount(token.line + 1) + 1;
-    printf("%u|%.*s\n", token.line + 1, lineEnd - lineStart + 1, lineStart);
+    printf("%zu|%.*s\n", token.line + 1, (int) (lineEnd - lineStart + 1), lineStart);
 
-    for (size_t i = 0; i < token.pos - lineStart + lineOffset; i++)
+    for (size_t i = 0; i + lineStart < token.pos + lineOffset; i++)
     {
         putchar(' ');
     }
@@ -478,8 +478,6 @@ Node* parseFactor(Parser* parser)
     }
     else
     {
-        KeywordCode curKeyword = curToken(parser)->data.keywordCode;
-
         switch (curToken(parser)->data.keywordCode)
         {
             case BRACKET_KEYWORD:
@@ -520,6 +518,8 @@ Node* parseFactor(Parser* parser)
                 proceed(parser);
                 break;
             }
+
+            default: { break; }
         }
     }
 

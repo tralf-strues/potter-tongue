@@ -141,7 +141,7 @@ bool finished(Tokenizer* tokenizer)
 {
     ASSERT_TOKENIZER(tokenizer);
 
-    return tokenizer->position - tokenizer->buffer > tokenizer->bufferSize;
+    return tokenizer->position > tokenizer->buffer + tokenizer->bufferSize;
 }
 
 void skipSpaces(Tokenizer* tokenizer)
@@ -174,7 +174,7 @@ bool processKeyword(Tokenizer* tokenizer)
     {
         Keyword keyword = KEYWORDS[i];
 
-        if (tokenizer->position + keyword.length - tokenizer->buffer > tokenizer->bufferSize)
+        if (tokenizer->position + keyword.length > tokenizer->buffer + tokenizer->bufferSize)
         {
             continue;
         }
@@ -264,7 +264,7 @@ bool processId(Tokenizer* tokenizer)
 
     size_t length = strspn(tokenizer->position, LETTERS);
 
-    if (tokenizer->position + length - tokenizer->buffer > tokenizer->bufferSize || length == 0)
+    if (tokenizer->position + length > tokenizer->buffer + tokenizer->bufferSize || length == 0)
     {
         return false;
     }
@@ -281,27 +281,41 @@ void dumpTokens(Token* tokens, size_t count)
 
     for (size_t i = 0; i < count; i++)
     {
-        printf("Token %u:\n"
-               "    type = %d\n"
-               "    data = ", i, tokens[i].type);
+        printf("Token %zu:\n"
+               "\ttype = %d\n"
+               "\tdata = ", i, tokens[i].type);
 
         switch (tokens[i].type)
         {
-            case NUMBER_TOKEN_TYPE:  { printf("(number) %lg\n",          tokens[i].data.number);                                                 break; }
-            case ID_TOKEN_TYPE:      { printf("(id) '%s'\n",             tokens[i].data.id);                                                     break; }
-            case KEYWORD_TOKEN_TYPE: { printf("(keywordCode) %d '%s'\n", tokens[i].data.keywordCode, KEYWORDS[tokens[i].data.keywordCode].name); break; }
+            case NUMBER_TOKEN_TYPE: 
+            { 
+                printf("(number) %lg\n", tokens[i].data.number);
+                break; 
+            }
+
+            case ID_TOKEN_TYPE: 
+            { 
+                printf("(id) '%s'\n", tokens[i].data.id);
+                break; 
+            }
+
+            case KEYWORD_TOKEN_TYPE: 
+            { 
+                printf("(keywordCode) %d '%s'\n", tokens[i].data.keywordCode, KEYWORDS[tokens[i].data.keywordCode].name); 
+                break; 
+            }
         }
 
-        printf("    line = %u\n", tokens[i].line);
+        printf("\tline = %zu\n", tokens[i].line);
 
         if (tokens[i].pos[0] == '\n')
         {
-            printf("    pos  = '\\n'\n\n");
+            printf("\tpos  = '\\n'\n\n");
         }
         else
         {
             size_t length = strcspn(tokens[i].pos, "\n");
-            printf("    pos  = '%.*s'\n\n", length, tokens[i].pos);
+            printf("\tpos  = '%.*s'\n\n", (int) length, tokens[i].pos);
         }
     }
 }

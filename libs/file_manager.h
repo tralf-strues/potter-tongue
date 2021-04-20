@@ -25,7 +25,7 @@ void   resetTextToStart        (Text* text);
 size_t getCurrentLineNumber    (Text* text);
 char*  getLine                 (Text* text, size_t i);
 
-size_t replaceAllOccurences    (char* buffer, size_t bufferSize, char target, char replacement);
+size_t replaceAllOccurrences   (char* buffer, size_t bufferSize, char target, char replacement);
 char*  strToLower              (char* str);
 char*  strToUpper              (char* str);
 Text*  makeTextCaseHomogeneous (Text* text, const char* flag);
